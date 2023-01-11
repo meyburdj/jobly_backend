@@ -1,6 +1,19 @@
 const { BadRequestError } = require("../expressError");
 
-// THIS NEEDS SOME GREAT DOCUMENTATION.
+/**
+ *  Prevents sql injection by taking in key value pairs for datatoUpdate
+ *  and provides keys to use that are secure.
+ *
+ *  Takes in dataToUpdate and jsToSql:
+ *  dataToUpdate can include: {name, description, numEmployees, logoUrl}
+ *  jsToSql will convert camelCase to snake_case.
+ *
+ *
+ *  Returns an object with two keys:
+ *    {SetCol:
+ *    Values:
+ */
+
 
 function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   const keys = Object.keys(dataToUpdate);

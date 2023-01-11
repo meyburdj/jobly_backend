@@ -7,7 +7,7 @@ require("colors");
 
 const SECRET_KEY = process.env.SECRET_KEY || "secret-dev";
 
-const PORT = +process.env.PORT || 3001;
+const PORT = +process.env.PORT || 3009;
 
 // Use dev database, testing database, or via env var, production database
 function getDatabaseUri() {
@@ -34,3 +34,15 @@ module.exports = {
   BCRYPT_WORK_FACTOR,
   getDatabaseUri,
 };
+
+
+// {
+// 	"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ikplc3NlTG92ZXNUcmFzaCIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE2NzM0NjI0OTR9.v5vzE8pBg8_VdQ-nleAr-6ReGWTQ7s1T9Y-FENkMZSo"
+// }
+// {
+// 	"username": "JesseLovesTrash",
+// 	"password": "abc123",
+// 	"firstName": "Jesse",
+// 	"lastName": "Trash",
+// 	"email": "Jesse@trash.com"
+// }
