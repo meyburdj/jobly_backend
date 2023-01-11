@@ -14,9 +14,12 @@ const companyUpdateSchema = require("../schemas/companyUpdate.json");
 
 const router = new express.Router();
 
-const { sqlForPartialUpdate } = require("../helpers/sql.js");
-const db = require("../db");
+const {
+  sqlForPartialUpdate,
+  sqlForSelectCompany,
+} = require("../helpers/sql.js");
 
+const db = require("../db");
 
 /** POST / { company } =>  { company }
  *
@@ -28,13 +31,11 @@ const db = require("../db");
  */
 
 router.post("/", ensureLoggedIn, async function (req, res, next) {
-  const validator = jsonschema.validate(
-    req.body,
-    companyNewSchema,
-    { required: true }
-  );
+  const validator = jsonschema.validate(req.body, companyNewSchema, {
+    required: true,
+  });
   if (!validator.valid) {
-    const errs = validator.errors.map(e => e.stack);
+    const errs = validator.errors.map((e) => e.stack);
     throw new BadRequestError(errs);
   }
 
@@ -54,18 +55,28 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
+  // //the new potential querry strings
+  // const { nameLike, minEmployees, maxEmployees } = req.query;
 
-  //the new potential querry strings
-  const { nameLike, minEmployees, maxEmployees } = req.query;
-
-  if (minEmployees > maxEmployees) {
-    throw new BadRequestError("Maximum Employees must be greater than minimum employees")
+  if (req.query?.minEmployees > req.query?.maxEmployees) {
+    throw new BadRequestError(
+      "Maximum Employees must be greater than minimum employees"
+    );
   }
 
-  const result = await db.query(querySql, [...values]);
+  const { whereStatement, values } = sqlForSelectCompany(req.query);
 
-  const companies = await Company.findAll();
-  return res.json({ companies });
+
+  console.log("whereStatement:", whereStatement, "values:", ...values);
+  debugger
+  const results = await db.query(
+    `SELECT *
+      FROM companies
+      WHERE ${whereStatement}`,
+    [...values]
+  );
+
+  return res.json(results.rows);
 });
 
 /** GET /[handle]  =>  { company }
@@ -93,13 +104,11 @@ router.get("/:handle", async function (req, res, next) {
  */
 
 router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
-  const validator = jsonschema.validate(
-    req.body,
-    companyUpdateSchema,
-    { required: true }
-  );
+  const validator = jsonschema.validate(req.body, companyUpdateSchema, {
+    required: true,
+  });
   if (!validator.valid) {
-    const errs = validator.errors.map(e => e.stack);
+    const errs = validator.errors.map((e) => e.stack);
     throw new BadRequestError(errs);
   }
 
@@ -116,6 +125,5 @@ router.delete("/:handle", ensureLoggedIn, async function (req, res, next) {
   await Company.remove(req.params.handle);
   return res.json({ deleted: req.params.handle });
 });
-
 
 module.exports = router;
