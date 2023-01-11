@@ -5,7 +5,7 @@
 const jsonschema = require("jsonschema");
 const express = require("express");
 
-const { BadRequestError } = require("../expressError");
+const { BadRequestError, NotFoundError } = require("../expressError");
 const { ensureLoggedIn } = require("../middleware/auth");
 const Company = require("../models/company");
 
@@ -13,6 +13,9 @@ const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
 
 const router = new express.Router();
+
+const { sqlForPartialUpdate } = require("../helpers/sql.js");
+const db = require("../db");
 
 
 /** POST / { company } =>  { company }
@@ -28,7 +31,7 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
   const validator = jsonschema.validate(
     req.body,
     companyNewSchema,
-    {required: true}
+    { required: true }
   );
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);
@@ -51,6 +54,16 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
+
+  //the new potential querry strings
+  const { nameLike, minEmployees, maxEmployees } = req.query;
+
+  if (minEmployees > maxEmployees) {
+    throw new BadRequestError("Maximum Employees must be greater than minimum employees")
+  }
+
+  const result = await db.query(querySql, [...values]);
+
   const companies = await Company.findAll();
   return res.json({ companies });
 });
@@ -83,7 +96,7 @@ router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
   const validator = jsonschema.validate(
     req.body,
     companyUpdateSchema,
-    {required:true}
+    { required: true }
   );
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);
