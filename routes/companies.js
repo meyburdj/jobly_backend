@@ -11,7 +11,7 @@ const Company = require("../models/company");
 
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
-const selectCompanies = require("../schemas/selectCompanies.json")
+const selectCompanies = require("../schemas/selectCompanies.json");
 
 const router = new express.Router();
 
@@ -21,6 +21,7 @@ const {
 } = require("../helpers/sql.js");
 
 const db = require("../db");
+const { search } = require("superagent");
 
 /** POST / { company } =>  { company }
  *
@@ -56,12 +57,13 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-
   //If there are no query paramaters then return all companies
-  if (!(req.query.nameLike || req.query.minEmployees || req.query.maxEmployees)) {
+  if (
+    !(req.query.nameLike || req.query.minEmployees || req.query.maxEmployees)
+  ) {
     const companies = await Company.findAll();
     return res.json({ companies });
-  };
+  }
 
   //validate query string
   const validator = jsonschema.validate(req.query, selectCompanies, {
@@ -71,30 +73,37 @@ router.get("/", async function (req, res, next) {
     const errs = validator.errors.map((e) => e.stack);
     throw new BadRequestError(errs);
   }
-  if (req.query?.minEmployees > req.query?.maxEmployees) {
+
+  // UPDATE: Added parseInt to convert to number so this works.
+  if (parseInt(req.query?.minEmployees) > parseInt(req.query?.maxEmployees)) {
     throw new BadRequestError(
       "Maximum Employees must be greater than minimum employees"
     );
   }
 
-  //get companies modified by query string
-  const { whereStatement, values } = sqlForSelectCompany(req.query);
+  // UPDATE: Added filterCompanies static method on Company Class.
+  const companies = await Company.filterCompanies(req.query);
 
-  const results = await db.query(
-    `SELECT handle,
-            name,
-            description,
-            num_employees AS "numEmployees",
-            logo_url AS "logoUrl"
-      FROM companies
-      WHERE ${whereStatement}`,
-    [...values]
-  );
-
-  const companies = results.rows
-  console.log("consolelog of companies: ", companies)
   return res.json({ companies });
 });
+
+/** OLD CODE: SAVING IN CASE I BROKE SOMETHING */
+//get companies modified by query string
+// const { whereStatement, values } = sqlForSelectCompany(req.query);
+
+// const results = await db.query(
+//   `SELECT handle,
+//           name,
+//           description,
+//           num_employees AS "numEmployees",
+//           logo_url AS "logoUrl"
+//     FROM companies
+//     WHERE ${whereStatement}`,
+//   [...values]
+// );
+// const companies = results.rows
+
+// return res.json({ companies });
 
 /** GET /[handle]  =>  { company }
  *

@@ -232,6 +232,19 @@ describe("GET /companies", function () {
     });
   });
 
+  test("minEmployees > maxEmployee failure", async function () {
+    const resp = await request(app)
+      .get("/companies")
+      .query({ minEmployees: 100, maxEmployees: 5 });
+    expect(resp.statusCode).toEqual(400)
+    expect(resp.body).toEqual({
+      "error": {
+        "message": "Maximum Employees must be greater than minimum employees",
+        "status": 400
+      }
+    });
+  });
+
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---
     // thus making it hard to test that the error-handler works with it. This

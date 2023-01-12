@@ -19,14 +19,13 @@ const { BadRequestError } = require("../expressError");
  *    Values: [columnName1Value, columnName2Value...] }
  */
 
-
 function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   const keys = Object.keys(dataToUpdate);
   if (keys.length === 0) throw new BadRequestError("No data");
 
   // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
-  const cols = keys.map((colName, idx) =>
-    `"${jsToSql[colName] || colName}"=$${idx + 1}`,
+  const cols = keys.map(
+    (colName, idx) => `"${jsToSql[colName] || colName}"=$${idx + 1}`
   );
 
   return {
@@ -34,7 +33,6 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
     values: Object.values(dataToUpdate),
   };
 }
-
 
 /**
  *  Prevents sql injection by taking in key value pairs for datatoFilter
@@ -53,29 +51,28 @@ function sqlForSelectCompany(dataToFilter) {
   const keys = Object.keys(dataToFilter);
 
   const statements = {
-    nameLike: 'name ILIKE ',
-    minEmployees: 'num_employees > ',
-    maxEmployees: 'num_employees < '
-  }
+    nameLike: "name ILIKE ",
+    minEmployees: "num_employees > ",
+    maxEmployees: "num_employees < ",
+  };
 
   // {name: 'Jane', minEmployees: 100, maxEmployees: 500} returns:
   //  ["name ilike %$1%", "num_employees > $2", num_employees < $3]
 
   const whereStatements = keys.map((queryParams, idx) => {
-  return `${statements[[queryParams]]}$${idx + 1}`;
-  })
+    return `${statements[[queryParams]]}$${idx + 1}`;
+  });
 
-  const values = Object.keys(dataToFilter).map(key => {
-    if (key === 'nameLike') {
-      dataToFilter[key] = `%${dataToFilter[key]}%`
+  const values = Object.keys(dataToFilter).map((key) => {
+    if (key === "nameLike") {
+      dataToFilter[key] = `%${dataToFilter[key]}%`;
     }
     return dataToFilter[key];
-  })
-
+  });
 
   return {
-    whereStatement: whereStatements.join(' AND '),
-    values
+    whereStatement: whereStatements.join(" AND "),
+    values,
   };
 }
 
