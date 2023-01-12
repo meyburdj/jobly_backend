@@ -11,6 +11,7 @@ const Company = require("../models/company");
 
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
+const selectCompanies = require("../schemas/selectCompanies.json")
 
 const router = new express.Router();
 
@@ -55,8 +56,21 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-  // //the new potential querry strings
-  // const { nameLike, minEmployees, maxEmployees } = req.query;
+
+  console.log("we've used the right route")
+  console.log("req.query: ", req.query)
+  if (!req.query.length) {
+    const companies = await Company.findAll();
+    return res.json({ companies });
+  };
+
+  const validator = jsonschema.validate(req.query, selectCompanies, {
+    required: true,
+  });
+  if (!validator.valid) {
+    const errs = validator.errors.map((e) => e.stack);
+    throw new BadRequestError(errs);
+  }
 
   if (req.query?.minEmployees > req.query?.maxEmployees) {
     throw new BadRequestError(
