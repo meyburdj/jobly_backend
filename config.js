@@ -11,20 +11,20 @@ const PORT = +process.env.PORT || 3009;
 
 /* Chalon's version **/
 // Use dev database, testing database, or via env var, production database
-// function getDatabaseUri() {
-//   return (process.env.NODE_ENV === "test")
-//       ? "jobly_test"
-//       : process.env.DATABASE_URL || "jobly";
-// }
+function getDatabaseUri() {
+  return (process.env.NODE_ENV === "test")
+      ? "jobly_test"
+      : process.env.DATABASE_URL || "jobly";
+}
 
 
 /* Jesse's bum WSL version **/
 // Use dev database, testing database, or via env var, production database
-function getDatabaseUri() {
-  return (process.env.NODE_ENV === "test")
-    ? "postgresql://meyburdj:meyburdj@localhost/jobly_test"
-    : "postgresql://meyburdj:meyburdj@localhost/jobly";
-}
+// function getDatabaseUri() {
+//   return (process.env.NODE_ENV === "test")
+//     ? "postgresql://meyburdj:meyburdj@localhost/jobly_test"
+//     : "postgresql://meyburdj:meyburdj@localhost/jobly";
+// }
 
 // Speed up bcrypt during tests, since the algorithm safety isn't being tested
 //
@@ -45,14 +45,3 @@ module.exports = {
   getDatabaseUri,
 };
 
-
-// {
-// 	"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ikplc3NlTG92ZXNUcmFzaCIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE2NzM0NjI0OTR9.v5vzE8pBg8_VdQ-nleAr-6ReGWTQ7s1T9Y-FENkMZSo"
-// }
-// {
-// 	"username": "JesseLovesTrash",
-// 	"password": "abc123",
-// 	"firstName": "Jesse",
-// 	"lastName": "Trash",
-// 	"email": "Jesse@trash.com"
-// }

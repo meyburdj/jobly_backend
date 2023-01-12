@@ -11,64 +11,57 @@ async function commonBeforeAll() {
   // noinspection SqlWithoutWhere
   await db.query("DELETE FROM companies");
 
-  await Company.create(
-    {
-      handle: "c1",
-      name: "C1",
-      numEmployees: 1,
-      description: "Desc1",
-      logoUrl: "http://c1.img",
-    });
-  await Company.create(
-    {
-      handle: "c2",
-      name: "C2",
-      numEmployees: 2,
-      description: "Desc2",
-      logoUrl: "http://c2.img",
-    });
-  await Company.create(
-    {
-      handle: "c3",
-      name: "C3",
-      numEmployees: 3,
-      description: "Desc3",
-      logoUrl: "http://c3.img",
-    });
-  await Company.create(
-    {
-      handle: "c33",
-      name: "C33",
-      numEmployees: 50,
-      description: "Desc33",
-      logoUrl: "http://c33.img",
-    });
+  await Company.create({
+    handle: "c1",
+    name: "C1",
+    numEmployees: 1,
+    description: "Desc1",
+    logoUrl: "http://c1.img",
+  });
+  await Company.create({
+    handle: "c2",
+    name: "C2",
+    numEmployees: 2,
+    description: "Desc2",
+    logoUrl: "http://c2.img",
+  });
+  await Company.create({
+    handle: "c3",
+    name: "C3",
+    numEmployees: 3,
+    description: "Desc3",
+    logoUrl: "http://c3.img",
+  });
+  await Company.create({
+    handle: "c33",
+    name: "C33",
+    numEmployees: 50,
+    description: "Desc33",
+    logoUrl: "http://c33.img",
+  });
 
-  await Company.create(
-    {
-      handle: "c34",
-      name: "C4",
-      numEmployees: 1,
-      description: "Desc34",
-      logoUrl: "http://c34.img",
-    });
+  await Company.create({
+    handle: "c34",
+    name: "C4",
+    numEmployees: 1,
+    description: "Desc34",
+    logoUrl: "http://c34.img",
+  });
 
-  await Company.create(
-    {
-      handle: "c35",
-      name: "C44",
-      numEmployees: 999,
-      description: "Desc35",
-      logoUrl: "http://c35.img",
-    });
-  await Company.create(
-    {
-      handle: "a",
-      name: "a",
-      numEmployees: 999,
-      description: "a",
-      logoUrl: "http://c35.img",
-    });
+  await Company.create({
+    handle: "c35",
+    name: "C44",
+    numEmployees: 999,
+    description: "Desc35",
+    logoUrl: "http://c35.img",
+  });
+  await Company.create({
+    handle: "a",
+    name: "a",
+    numEmployees: 999,
+    description: "a",
+    logoUrl: "http://c35.img",
+  });
 
   await User.register({
     username: "u1",
@@ -102,7 +95,6 @@ async function commonBeforeAll() {
     password: "adminadmin",
     isAdmin: true,
   });
-
 }
 
 async function commonBeforeEach() {
@@ -117,10 +109,9 @@ async function commonAfterAll() {
   await db.end();
 }
 
-
 const u1Token = createToken({ username: "u1", isAdmin: false });
-const adminToken = createToken({ username: "admin", isAdmin: true })
-
+const u2Token = createToken({ username: "u2", isAdmin: false });
+const adminToken = createToken({ username: "admin", isAdmin: true });
 
 module.exports = {
   commonBeforeAll,
@@ -128,5 +119,6 @@ module.exports = {
   commonAfterEach,
   commonAfterAll,
   u1Token,
+  u2Token,
   adminToken,
 };

@@ -59,3 +59,4 @@ describe("ensureLoggedIn", function () {
     expect(() => ensureLoggedIn(req, res, next)).toThrowError();
   });
 });
+

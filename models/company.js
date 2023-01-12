@@ -49,6 +49,7 @@ class Company {
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
+  //TODO: combine w/ filter
   static async findAll() {
     const companiesRes = await db.query(
       `SELECT handle,
@@ -99,7 +100,7 @@ class Company {
    *
    * If no results are found, then return the empty list.
    * */
-  static async filterCompanies(searchTerms) {
+  static async filterCompanies(searchTerms={}) {
     const { whereStatement, values } = sqlForSelectCompany(searchTerms);
 
     const results = await db.query(

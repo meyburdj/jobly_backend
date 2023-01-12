@@ -87,7 +87,6 @@ router.get("/", async function (req, res, next) {
   return res.json({ companies });
 });
 
-
 router.get("/:handle", async function (req, res, next) {
   const company = await Company.get(req.params.handle);
   return res.json({ company });
@@ -104,27 +103,37 @@ router.get("/:handle", async function (req, res, next) {
  * Authorization required: login
  */
 
-router.patch("/:handle", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
-  const validator = jsonschema.validate(req.body, companyUpdateSchema, {
-    required: true,
-  });
-  if (!validator.valid) {
-    const errs = validator.errors.map((e) => e.stack);
-    throw new BadRequestError(errs);
-  }
+router.patch(
+  "/:handle",
+  ensureLoggedIn,
+  ensureAdmin,
+  async function (req, res, next) {
+    const validator = jsonschema.validate(req.body, companyUpdateSchema, {
+      required: true,
+    });
+    if (!validator.valid) {
+      const errs = validator.errors.map((e) => e.stack);
+      throw new BadRequestError(errs);
+    }
 
-  const company = await Company.update(req.params.handle, req.body);
-  return res.json({ company });
-});
+    const company = await Company.update(req.params.handle, req.body);
+    return res.json({ company });
+  }
+);
 
 /** DELETE /[handle]  =>  { deleted: handle }
  *
  * Authorization: login
  */
 
-router.delete("/:handle", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
-  await Company.remove(req.params.handle);
-  return res.json({ deleted: req.params.handle });
-});
+router.delete(
+  "/:handle",
+  ensureLoggedIn,
+  ensureAdmin,
+  async function (req, res, next) {
+    await Company.remove(req.params.handle);
+    return res.json({ deleted: req.params.handle });
+  }
+);
 
 module.exports = router;

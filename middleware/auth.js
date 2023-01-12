@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../config");
 const { UnauthorizedError } = require("../expressError");
 
-
 /** Middleware: Authenticate user.
  *
  * If a token was provided, verify it, and, if valid, store the token payload
@@ -34,7 +33,8 @@ function authenticateJWT(req, res, next) {
  */
 
 function ensureLoggedIn(req, res, next) {
-  if (!res.locals.user?.username) throw new UnauthorizedError("Must be logged in");
+  if (!res.locals.user?.username)
+    throw new UnauthorizedError("Must be logged in");
 
   return next();
 }
@@ -50,9 +50,21 @@ function ensureAdmin(req, res, next) {
   return next();
 }
 
+function ensureSelfOrAdimin(req, res, next) {
+  const user = res.locals.user;
+  // const checks = [req.params.username, req.body.username, req]
+  // check if admin || check if user is the
+
+  console.log("user:", user, "req.params.username", req.params.username)
+  if (!user.isAdmin && user.username !== req.params.username) {
+    throw new UnauthorizedError("Access denied.");
+  }
+  return next();
+}
 
 module.exports = {
   authenticateJWT,
   ensureLoggedIn,
-  ensureAdmin
+  ensureAdmin,
+  ensureSelfOrAdimin
 };
