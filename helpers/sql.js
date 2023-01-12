@@ -50,10 +50,11 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 function sqlForSelectCompany(dataToFilter) {
   const keys = Object.keys(dataToFilter);
 
+  //UPDATE: Changed > to >= and < to <= to be inclusive for search.
   const statements = {
     nameLike: "name ILIKE ",
-    minEmployees: "num_employees > ",
-    maxEmployees: "num_employees < ",
+    minEmployees: "num_employees >= ",
+    maxEmployees: "num_employees <= ",
   };
 
   // {name: 'Jane', minEmployees: 100, maxEmployees: 500} returns:
