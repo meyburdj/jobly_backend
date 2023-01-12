@@ -61,14 +61,14 @@ async function commonBeforeAll() {
       description: "Desc35",
       logoUrl: "http://c35.img",
     });
-    await Company.create(
-      {
-        handle: "a",
-        name: "a",
-        numEmployees: 999,
-        description: "a",
-        logoUrl: "http://c35.img",
-      });
+  await Company.create(
+    {
+      handle: "a",
+      name: "a",
+      numEmployees: 999,
+      description: "a",
+      logoUrl: "http://c35.img",
+    });
 
   await User.register({
     username: "u1",
@@ -94,6 +94,15 @@ async function commonBeforeAll() {
     password: "password3",
     isAdmin: false,
   });
+  await User.register({
+    username: "admin",
+    firstName: "admin",
+    lastName: "admin",
+    email: "admin@user.com",
+    password: "adminadmin",
+    isAdmin: true,
+  });
+
 }
 
 async function commonBeforeEach() {
@@ -110,6 +119,7 @@ async function commonAfterAll() {
 
 
 const u1Token = createToken({ username: "u1", isAdmin: false });
+const adminToken = createToken({ username: "admin", isAdmin: true })
 
 
 module.exports = {
@@ -118,4 +128,5 @@ module.exports = {
   commonAfterEach,
   commonAfterAll,
   u1Token,
+  adminToken,
 };
