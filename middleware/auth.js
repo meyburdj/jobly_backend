@@ -34,8 +34,8 @@ function authenticateJWT(req, res, next) {
  */
 
 function ensureLoggedIn(req, res, next) {
-  if (!res.locals.user.username) throw new UnauthorizedError("Must be logged in");
-  console.log("ensureLoggedIn", res.locals.user)
+  if (!res.locals.user?.username) throw new UnauthorizedError("Must be logged in");
+
   return next();
 }
 
@@ -45,8 +45,7 @@ function ensureLoggedIn(req, res, next) {
  */
 
 function ensureAdmin(req, res, next) {
-  if (!res.locals.user.isAdmin) throw new UnauthorizedError("Requires admin");
-  console.log("ensureAdmin", res.locals.user)
+  if (!res.locals.user?.isAdmin) throw new UnauthorizedError("Requires admin");
 
   return next();
 }
