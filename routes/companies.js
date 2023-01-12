@@ -57,13 +57,13 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
 
-  console.log("we've used the right route")
-  console.log("req.query: ", req.query)
-  if (!req.query.length) {
+  //If there are no query paramaters then return all companies
+  if (!(req.query.nameLike || req.query.minEmployees || req.query.maxEmployees)) {
     const companies = await Company.findAll();
     return res.json({ companies });
   };
 
+  //validate query string
   const validator = jsonschema.validate(req.query, selectCompanies, {
     required: true,
   });
@@ -71,26 +71,29 @@ router.get("/", async function (req, res, next) {
     const errs = validator.errors.map((e) => e.stack);
     throw new BadRequestError(errs);
   }
-
   if (req.query?.minEmployees > req.query?.maxEmployees) {
     throw new BadRequestError(
       "Maximum Employees must be greater than minimum employees"
     );
   }
 
+  //get companies modified by query string
   const { whereStatement, values } = sqlForSelectCompany(req.query);
 
-
-  console.log("whereStatement:", whereStatement, "values:", ...values);
-  debugger
   const results = await db.query(
-    `SELECT *
+    `SELECT handle,
+            name,
+            description,
+            num_employees AS "numEmployees",
+            logo_url AS "logoUrl"
       FROM companies
       WHERE ${whereStatement}`,
     [...values]
   );
 
-  return res.json(results.rows);
+  const companies = results.rows
+  console.log("consolelog of companies: ", companies)
+  return res.json({ companies });
 });
 
 /** GET /[handle]  =>  { company }

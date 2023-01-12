@@ -125,7 +125,9 @@ describe("GET /companies", function () {
   });
 
   test("ok for nameLike", async function () {
-    const resp = await request(app).get("/companies?nameLike=a");
+    const resp = await request(app)
+      .get("/companies")
+      .query({ nameLike: "a" });
     expect(resp.body).toEqual({
       companies:
         [
