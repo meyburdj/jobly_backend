@@ -142,6 +142,96 @@ describe("GET /companies", function () {
     });
   });
 
+  test("ok for minEmployees", async function () {
+    const resp = await request(app)
+      .get("/companies")
+      .query({ minEmployees: 500 });
+    expect(resp.body).toEqual({
+      companies:
+        [
+          {
+            handle: "c35",
+            name: "C44",
+            numEmployees: 999,
+            description: "Desc35",
+            logoUrl: "http://c35.img",
+          },
+          {
+            handle: "a",
+            name: "a",
+            numEmployees: 999,
+            description: "a",
+            logoUrl: "http://c35.img",
+          },
+        ],
+    });
+  });
+
+  test("ok for maxEmployees", async function () {
+    const resp = await request(app)
+      .get("/companies")
+      .query({ maxEmployees: 10 });
+    expect(resp.body).toEqual({
+      companies:
+        [
+          {
+            handle: "c1",
+            name: "C1",
+            description: "Desc1",
+            numEmployees: 1,
+            logoUrl: "http://c1.img",
+          },
+          {
+            handle: "c2",
+            name: "C2",
+            description: "Desc2",
+            numEmployees: 2,
+            logoUrl: "http://c2.img",
+          },
+          {
+            handle: "c3",
+            name: "C3",
+            description: "Desc3",
+            numEmployees: 3,
+            logoUrl: "http://c3.img",
+          },
+          {
+            handle: "c34",
+            name: "C4",
+            numEmployees: 1,
+            description: "Desc34",
+            logoUrl: "http://c34.img",
+          },
+        ],
+    });
+  });
+
+  test("minEmployees fail validation", async function () {
+    const resp = await request(app)
+      .get("/companies")
+      .query({ minEmployees: "test1" });
+    expect(resp.statusCode).toEqual(500)
+    expect(resp.body).toEqual({
+      "error": {
+        "message": "invalid input syntax for type integer: \"test1\"",
+        "status": 500
+      }
+    });
+  });
+
+  test("maxEmployees fail validation", async function () {
+    const resp = await request(app)
+      .get("/companies")
+      .query({ minEmployees: "test1" });
+    expect(resp.statusCode).toEqual(500)
+    expect(resp.body).toEqual({
+      "error": {
+        "message": "invalid input syntax for type integer: \"test1\"",
+        "status": 500
+      }
+    });
+  });
+
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---
     // thus making it hard to test that the error-handler works with it. This
