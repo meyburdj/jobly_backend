@@ -49,7 +49,7 @@ function ensureAdmin(req, res, next) {
 
   return next();
 }
-
+//TODO: added during code review
 function ensureSelfOrAdimin(req, res, next) {
   const user = res.locals.user;
   // const checks = [req.params.username, req.body.username, req]
