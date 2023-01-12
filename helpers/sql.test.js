@@ -32,7 +32,6 @@ describe("use sql partial update function", function () {
 describe("use sql to query input parameters", function () {
   test("gives correct query", function () {
     const dataToFilter = {
-      // UPDATE: Changed name to nameLike.
       nameLike: "bak",
       minEmployees: 10,
       maxEmployees: 500,
@@ -40,10 +39,8 @@ describe("use sql to query input parameters", function () {
 
     const output = sqlForSelectCompany(dataToFilter);
     expect(output).toEqual({
-      // UPDATE: Changed "bak" to "%bak%"
       values: ["%bak%", 10, 500],
       whereStatement:
-      // UPDATE: Changed 'undefined$1' to name 'ILIKE $1'
         "name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3",
     });
   });

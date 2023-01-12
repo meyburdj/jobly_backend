@@ -12,6 +12,7 @@ const Company = require("../models/company");
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
 const selectCompanies = require("../schemas/selectCompanies.json");
+const validate = require("../helpers/schema")
 
 const router = new express.Router();
 
@@ -64,54 +65,21 @@ router.get("/", async function (req, res, next) {
     const companies = await Company.findAll();
     return res.json({ companies });
   }
+  console.log("REQ QUERY!!!!:", req.query)
+  validate(req.query, selectCompanies);
 
-  //validate query string
-  const validator = jsonschema.validate(req.query, selectCompanies, {
-    required: true,
-  });
-  if (!validator.valid) {
-    const errs = validator.errors.map((e) => e.stack);
-    throw new BadRequestError(errs);
-  }
-
-  // UPDATE: Added parseInt to convert to number so this works.
   if (parseInt(req.query?.minEmployees) > parseInt(req.query?.maxEmployees)) {
     throw new BadRequestError(
       "Maximum Employees must be greater than minimum employees"
     );
   }
 
-  // UPDATE: Added filterCompanies static method on Company Class.
+  // Calls filterCompanies with search query.
   const companies = await Company.filterCompanies(req.query);
 
   return res.json({ companies });
 });
 
-/** OLD CODE: SAVING IN CASE I BROKE SOMETHING */
-//get companies modified by query string
-// const { whereStatement, values } = sqlForSelectCompany(req.query);
-
-// const results = await db.query(
-//   `SELECT handle,
-//           name,
-//           description,
-//           num_employees AS "numEmployees",
-//           logo_url AS "logoUrl"
-//     FROM companies
-//     WHERE ${whereStatement}`,
-//   [...values]
-// );
-// const companies = results.rows
-
-// return res.json({ companies });
-
-/** GET /[handle]  =>  { company }
- *
- *  Company is { handle, name, description, numEmployees, logoUrl, jobs }
- *   where jobs is [{ id, title, salary, equity }, ...]
- *
- * Authorization required: none
- */
 
 router.get("/:handle", async function (req, res, next) {
   const company = await Company.get(req.params.handle);

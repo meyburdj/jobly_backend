@@ -89,7 +89,7 @@ class Company {
     return company;
   }
 
-  // UPDATE: Added this here to allow route to do more route stuff n less SQL.
+
   /** Filter for companies by search terms.
    *  Search terms are optional.
    *
