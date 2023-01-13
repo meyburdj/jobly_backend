@@ -64,9 +64,9 @@ router.get("/", async function (req, res, next) {
     const companies = await Company.findAll();
     return res.json({ companies });
   }
-
+  const query = req.query;
   //validate query
-  const validator = jsonschema.validate(req.query, selectCompanies, {
+  const validator = jsonschema.validate(query, selectCompanies, {
     required: true,
   });
 
@@ -87,6 +87,7 @@ router.get("/", async function (req, res, next) {
   return res.json({ companies });
 });
 
+//TODO: added docstring
 router.get("/:handle", async function (req, res, next) {
   const company = await Company.get(req.params.handle);
   return res.json({ company });
@@ -100,7 +101,7 @@ router.get("/:handle", async function (req, res, next) {
  *
  * Returns { handle, name, description, numEmployees, logo_url }
  *
- * Authorization required: login
+ * Authorization required: login, admin
  */
 
 router.patch(
@@ -123,7 +124,7 @@ router.patch(
 
 /** DELETE /[handle]  =>  { deleted: handle }
  *
- * Authorization: login
+ * Authorization: login, admin
  */
 
 router.delete(

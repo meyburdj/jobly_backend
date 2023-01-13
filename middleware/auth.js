@@ -49,13 +49,13 @@ function ensureAdmin(req, res, next) {
 
   return next();
 }
-//TODO: added during code review
+//TODO: fix adimin everywhere
 function ensureSelfOrAdimin(req, res, next) {
   const user = res.locals.user;
-  // const checks = [req.params.username, req.body.username, req]
-  // check if admin || check if user is the
+  // // const checks = [req.params.username, req.body.username, req]
+  // // check if admin || check if user is the
 
-  console.log("user:", user, "req.params.username", req.params.username)
+  // console.log("user:", user, "req.params.username", req.params.username)
   if (!user.isAdmin && user.username !== req.params.username) {
     throw new UnauthorizedError("Access denied.");
   }

@@ -11,7 +11,7 @@
         },
         "maxNumber": {
             "type": "integer"
-        },
-        "additionalProperties": false
-    }
+        }
+    },
+    "additionalProperties": false
 }

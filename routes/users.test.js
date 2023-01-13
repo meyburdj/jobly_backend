@@ -86,6 +86,7 @@ describe("POST /users", function () {
     expect(resp.statusCode).toEqual(401);
   });
 
+  //TODO: unauth for user that admin = false 
   test("bad request if missing data", async function () {
     const resp = await request(app)
       .post("/users")
@@ -157,6 +158,8 @@ describe("GET /users", function () {
     const resp = await request(app).get("/users");
     expect(resp.statusCode).toEqual(401);
   });
+
+  //TODO: unauth for user where admin = false 
 
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---

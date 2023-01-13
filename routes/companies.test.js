@@ -22,6 +22,7 @@ afterAll(commonAfterAll);
 /************************************** POST /companies */
 
 describe("POST /companies", function () {
+  //TODO: make tests for auth and for logged in admin = false 
   const newCompany = {
     handle: "new",
     name: "New",
