@@ -22,7 +22,7 @@ const db = require("../db");
 
 /** POST / { job } =>  { job }
  *
- * company should be { title, salary, equity, company_handle }
+ * job should be { title, salary, equity, company_handle }
  *
  * Returns { title, salary, equity, companyHandle }
  *
