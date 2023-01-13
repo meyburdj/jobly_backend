@@ -22,7 +22,6 @@ afterAll(commonAfterAll);
 /************************************** POST /companies */
 
 describe("POST /companies", function () {
-  //TODO: make tests for auth and for logged in admin = false 
   const newCompany = {
     handle: "new",
     name: "New",
@@ -48,17 +47,26 @@ describe("POST /companies", function () {
       .send(newCompany)
     expect(resp.statusCode).toEqual(401);
     expect(resp.body).toEqual({
-      "company": {
-        "description": "DescNew",
-        "handle": "new",
-        "logoUrl": "http://new.img",
-        "name": "New",
-        "numEmployees": 10,
-      },
+      "error": {
+        "message": "Must be logged in",
+        "status": 401
+      }
     });
   });
 
-
+  test("unauth for user not admin", async function () {
+    const resp = await request(app)
+      .post("/companies")
+      .send(newCompany)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+    expect(resp.body).toEqual({
+      "error": {
+        "message": "Requires admin",
+        "status": 401
+      }
+    });
+  });
 
   test("bad request with missing data", async function () {
     const resp = await request(app)
@@ -224,12 +232,14 @@ describe("GET /companies", function () {
     const resp = await request(app)
       .get("/companies")
       .query({ minEmployees: "test1" });
-    expect(resp.statusCode).toEqual(500);
+    expect(resp.statusCode).toEqual(400);
     expect(resp.body).toEqual({
-      error: {
-        message: 'invalid input syntax for type integer: "test1"',
-        status: 500,
-      },
+      "error": {
+        "message": [
+          "instance.minEmployees is not of a type(s) integer"
+        ],
+        "status": 400
+      }
     });
   });
 
@@ -241,7 +251,7 @@ describe("GET /companies", function () {
     expect(resp.body).toEqual({
       "error": {
         "message": [
-          "instance is not allowed to have the additional property \"maxEmployees\""
+          "instance.maxEmployees is not of a type(s) integer"
         ],
         "status": 400
       }
@@ -255,10 +265,7 @@ describe("GET /companies", function () {
     expect(resp.statusCode).toEqual(400);
     expect(resp.body).toEqual({
       "error": {
-        "message": [
-          "instance is not allowed to have the additional property \"minEmployees\"",
-          "instance is not allowed to have the additional property \"maxEmployees\""
-        ],
+        "message": "Maximum Employees must be greater than minimum employees",
         "status": 400
       }
     });
@@ -267,13 +274,12 @@ describe("GET /companies", function () {
   test("maxEmployees fail validation", async function () {
     const resp = await request(app)
       .get("/companies")
-      .query({ minEmployees: "test1", maxEmployees: "test2" });
+      .query({ maxEmployees: "test2" });
     expect(resp.statusCode).toEqual(400);
     expect(resp.body).toEqual({
       "error": {
         "message": [
-          "instance is not allowed to have the additional property \"minEmployees\"",
-          "instance is not allowed to have the additional property \"maxEmployees\""
+          "instance.maxEmployees is not of a type(s) integer"
         ],
         "status": 400
       }

@@ -6,10 +6,10 @@
         "nameLike": {
             "type": "string"
         },
-        "minNumber": {
+        "minEmployees": {
             "type": "integer"
         },
-        "maxNumber": {
+        "maxEmployees": {
             "type": "integer"
         }
     },

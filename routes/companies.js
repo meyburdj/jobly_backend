@@ -64,8 +64,11 @@ router.get("/", async function (req, res, next) {
     const companies = await Company.findAll();
     return res.json({ companies });
   }
-  const query = req.query;
   //validate query
+  let query = req.query;
+  if (query?.minEmployees) { query.minEmployees = parseInt(query.minEmployees) }
+  if (query?.maxEmployees) { query.maxEmployees = parseInt(query.maxEmployees) }
+
   const validator = jsonschema.validate(query, selectCompanies, {
     required: true,
   });
@@ -87,7 +90,6 @@ router.get("/", async function (req, res, next) {
   return res.json({ companies });
 });
 
-//TODO: added docstring
 /** gets information on a specific company by handle   
  * returns:
  * { handle, name, description, numEmployees, logoUrl } 

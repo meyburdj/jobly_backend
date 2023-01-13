@@ -86,7 +86,27 @@ describe("POST /users", function () {
     expect(resp.statusCode).toEqual(401);
   });
 
-  //TODO: unauth for user that admin = false 
+  test("unauth for user not admin", async function () {
+    const resp = await request(app)
+      .post("/users")
+      .send({
+        username: "u-new",
+        firstName: "First-new",
+        lastName: "Last-newL",
+        password: "password-new",
+        email: "new@email.com",
+        isAdmin: true,
+      })
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+    expect(resp.body).toEqual({
+      "error": {
+        "message": "Requires admin",
+        "status": 401
+      }
+    });
+  });
+
   test("bad request if missing data", async function () {
     const resp = await request(app)
       .post("/users")
