@@ -15,6 +15,26 @@ beforeEach(commonBeforeEach);
 afterEach(commonAfterEach);
 afterAll(commonAfterAll);
 
+//UPDATE: Moved here, changed name for better readability.
+/*************************************** SqlForFindAll */
+
+describe("use sql to query input parameters", function () {
+  test("gives correct query", function () {
+    const dataToFilter = {
+      nameLike: "bak",
+      minEmployees: 10,
+      maxEmployees: 500,
+    };
+
+    const output = Company.sqlForFindAll(dataToFilter);
+    expect(output).toEqual({
+      values: ["%bak%", 10, 500],
+      whereStatement:
+        "WHERE name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3",
+    });
+  });
+});
+
 /************************************** create */
 
 describe("create", function () {
@@ -112,12 +132,11 @@ describe("get", function () {
   });
 });
 
-/** UPDATE: Added these model tests here. */
-/************************************** filterCompaies */
+/************************************** findAll */
 
-describe("filterCompanies", function () {
+describe("findAll", function () {
   test("works", async function () {
-    let company = await Company.filterCompanies({
+    let company = await Company.findAll({
       nameLike: "c1",
       minEmployees: "1",
       maxEmployees: "2",
@@ -133,12 +152,26 @@ describe("filterCompanies", function () {
     ]);
   });
 
-  test("Invalid Input", async function () {
+  test("Invalid Number Input", async function () {
     try {
       await Company.get({
-        nameLIke: "c",
+        nameLike: "c",
         minEmployees: "a",
         maxEmployees: "c",
+      });
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+
+  // UPDATE: Added min > max.
+  test("Min > Max failure", async function () {
+    try {
+      await Company.get({
+        nameLike: "c",
+        minEmployees: 100,
+        maxEmployees: 5,
       });
       throw new Error("fail test, you shouldn't get here");
     } catch (err) {
@@ -210,7 +243,7 @@ describe("update", function () {
     ]);
   });
 
-  test("not found if no such company", async function () {
+  test("fails: not found if no such company", async function () {
     try {
       await Company.update("nope", updateData);
       throw new Error("fail test, you shouldn't get here");
@@ -219,7 +252,7 @@ describe("update", function () {
     }
   });
 
-  test("bad request with no data", async function () {
+  test("fails: bad request with no data", async function () {
     try {
       await Company.update("c1", {});
       throw new Error("fail test, you shouldn't get here");

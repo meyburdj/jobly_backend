@@ -15,10 +15,7 @@ const selectCompanies = require("../schemas/selectCompanies.json");
 
 const router = new express.Router();
 
-const {
-  sqlForPartialUpdate,
-  sqlForSelectCompany,
-} = require("../helpers/sql.js");
+const { sqlForPartialUpdate } = require("../helpers/sql.js");
 
 const db = require("../db");
 const { search } = require("superagent");
@@ -29,7 +26,7 @@ const { search } = require("superagent");
  *
  * Returns { handle, name, description, numEmployees, logoUrl }
  *
- * Authorization required: login and admin
+ * Authorization required: login & admin
  */
 
 router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
@@ -85,14 +82,15 @@ router.get("/", async function (req, res, next) {
   }
 
   // Calls filterCompanies with search query.
-  const companies = await Company.filterCompanies(req.query);
+  const companies = await Company.findAll(req.query);
 
   return res.json({ companies });
 });
 
-/** gets information on a specific company by handle   
+//TODO: added docstring
+/** gets information on a specific company by handle
  * returns:
- * { handle, name, description, numEmployees, logoUrl } 
+ * { handle, name, description, numEmployees, logoUrl }
  *
  * Authorization required: none
  */

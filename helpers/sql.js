@@ -34,46 +34,5 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
-/**
- *  Prevents sql injection by taking in key value pairs for datatoFilter
- *  and provides inputs useable in a sql querry to sanitize the data.
- *
- *  Takes in dataToFilter:
- *    can include:
- *    {name: 'Jane', minEmployees: 100, maxEmployees: 500}
- *
- *
- *  Returns an object with two keys:
- *    {whereStatement: "name ilike %$1% AND "num_employees > $2 AND num_employees < $3"
- *    Values: [%jane%, 100, 500] }
- */
-function sqlForSelectCompany(dataToFilter) {
-  const keys = Object.keys(dataToFilter);
 
-  const statements = {
-    nameLike: "name ILIKE ",
-    minEmployees: "num_employees >= ",
-    maxEmployees: "num_employees <= ",
-  };
-
-  // {name: 'Jane', minEmployees: 100, maxEmployees: 500} returns:
-  //  ["name ilike %$1%", "num_employees > $2", num_employees < $3]
-
-  const whereStatements = keys.map((queryParams, idx) => {
-    return `${statements[[queryParams]]}$${idx + 1}`;
-  });
-
-  const values = Object.keys(dataToFilter).map((key) => {
-    if (key === "nameLike") {
-      dataToFilter[key] = `%${dataToFilter[key]}%`;
-    }
-    return dataToFilter[key];
-  });
-
-  return {
-    whereStatement: whereStatements.join(" AND "),
-    values,
-  };
-}
-
-module.exports = { sqlForPartialUpdate, sqlForSelectCompany };
+module.exports = { sqlForPartialUpdate};

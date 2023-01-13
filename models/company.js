@@ -2,11 +2,62 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate, sqlForSelectCompany } = require("../helpers/sql");
+const { sqlForPartialUpdate } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
 class Company {
+  /**
+   *  Prevents sql injection by taking in key value pairs for datatoFilter
+   *  and provides inputs useable in a sql querry to sanitize the data.
+   *
+   *  Takes in dataToFilter:
+   *    can include:
+   *    {name: 'Jane', minEmployees: 100, maxEmployees: 500}
+   *
+   *
+   *  Returns an object with two keys:
+   *    {whereStatement: "name ilike %$1% AND "num_employees > $2 AND num_employees < $3"
+   *    Values: [%jane%, 100, 500] }
+   */
+
+  //UPDATE: Moved method here and added 'WHERE' and catch for 1st idx.
+  // Also changed name. We could of left this in sql, and made more modular by
+  // assigning statments and plugging that in instead? I dunno.
+  static sqlForFindAll(dataToFilter) {
+    const keys = Object.keys(dataToFilter);
+
+    const statements = {
+      nameLike: "name ILIKE ",
+      minEmployees: "num_employees >= ",
+      maxEmployees: "num_employees <= ",
+    };
+
+    // {name: 'Jane', minEmployees: 100, maxEmployees: 500} returns:
+    //  ["WHERE name ilike %$1%", "num_employees > $2", num_employees < $3]
+
+    const whereStatements = keys.map((queryParams, idx) => {
+      if (idx === 0) {
+        // added WHERE use is more flexible.
+        return `WHERE ${statements[[queryParams]]}$${idx + 1}`;
+      } else {
+        return `${statements[[queryParams]]}$${idx + 1}`;
+      }
+    });
+
+    const values = Object.keys(dataToFilter).map((key) => {
+      if (key === "nameLike") {
+        dataToFilter[key] = `%${dataToFilter[key]}%`;
+      }
+      return dataToFilter[key];
+    });
+
+    return {
+      whereStatement: whereStatements.join(" AND "),
+      values,
+    };
+  }
+
   /** Create a company (from data), update db, return new company data.
    *
    * data should be { handle, name, description, numEmployees, logoUrl }
@@ -44,21 +95,33 @@ class Company {
     return company;
   }
 
-  /** Find all companies.
+  /** Filter for companies by search terms.
+   *
+   *  Search terms are optional.
+   *
+   *  {nameLike, minEmployees, maxEmployees}
    *
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
+   *
+   * If no results are found, then return the empty array.
+   * If no search terms are given, then return all companies.
    * */
 
-  //TODO: combine w/ filter
-  static async findAll() {
+  //UPDATE: combined w/ filter, left name but could change if we wanted.
+  static async findAll(searchTerms = {}) {
+
+    const { whereStatement, values } = Company.sqlForFindAll(searchTerms);
+
     const companiesRes = await db.query(
       `SELECT handle,
-                name,
-                description,
-                num_employees AS "numEmployees",
-                logo_url AS "logoUrl"
-           FROM companies
-           ORDER BY name`
+              name,
+              description,
+              num_employees AS "numEmployees",
+              logo_url AS "logoUrl"
+        FROM companies
+        ${whereStatement}
+        ORDER BY name`,
+      [...values]
     );
     return companiesRes.rows;
   }
@@ -88,33 +151,6 @@ class Company {
     if (!company) throw new NotFoundError(`No company: ${handle}`);
 
     return company;
-  }
-
-
-  /** Filter for companies by search terms.
-   *  Search terms are optional.
-   *
-   *  {nameLike, minEmployees, maxEmployees}
-   *
-   * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
-   *
-   * If no results are found, then return the empty list.
-   * */
-  static async filterCompanies(searchTerms={}) {
-    const { whereStatement, values } = sqlForSelectCompany(searchTerms);
-
-    const results = await db.query(
-      `SELECT handle,
-              name,
-              description,
-              num_employees AS "numEmployees",
-              logo_url AS "logoUrl"
-        FROM companies
-        WHERE ${whereStatement}`,
-      [...values]
-    );
-
-    return results.rows;
   }
 
   /** Update company data with `data`.

@@ -54,7 +54,6 @@ function ensureSelfOrAdmin(req, res, next) {
   // // const checks = [req.params.username, req.body.username, req]
   // // check if admin || check if user is the
 
-  // console.log("user:", user, "req.params.username", req.params.username)
   if (!user.isAdmin && user.username !== req.params.username) {
     throw new UnauthorizedError("Access denied.");
   }

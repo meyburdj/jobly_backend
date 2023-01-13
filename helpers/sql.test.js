@@ -1,6 +1,6 @@
 "use strict";
 
-const { sqlForPartialUpdate, sqlForSelectCompany } = require("./sql.js");
+const { sqlForPartialUpdate } = require("./sql.js");
 
 describe("use sql partial update function", function () {
   test("gives correct output", function () {
@@ -25,23 +25,6 @@ describe("use sql partial update function", function () {
         5,
         "data:image/jpeg;base64,/9j/4PmhDP/9k=",
       ],
-    });
-  });
-});
-
-describe("use sql to query input parameters", function () {
-  test("gives correct query", function () {
-    const dataToFilter = {
-      nameLike: "bak",
-      minEmployees: 10,
-      maxEmployees: 500,
-    };
-
-    const output = sqlForSelectCompany(dataToFilter);
-    expect(output).toEqual({
-      values: ["%bak%", 10, 500],
-      whereStatement:
-        "name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3",
     });
   });
 });
