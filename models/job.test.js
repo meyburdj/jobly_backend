@@ -153,7 +153,6 @@ describe("get job by ID", function () {
            FROM jobs
            WHERE title = 'j3'`
         );
-        //UPDATE: Added db rollback to fix.
         const jobId = jobQuery.rows[0].id;
         const job = await Job.get(jobId);
         expect(job).toEqual({

@@ -20,10 +20,6 @@ class Company {
    *    {whereStatement: "name ilike %$1% AND "num_employees > $2 AND num_employees < $3"
    *    Values: [%jane%, 100, 500] }
    */
-
-  //UPDATE: Moved method here and added 'WHERE' and catch for 1st idx.
-  // Also changed name. We could of left this in sql, and made more modular by
-  // assigning statments and plugging that in instead? I dunno.
   static sqlForFindAll(dataToFilter) {
     const keys = Object.keys(dataToFilter);
 
@@ -58,7 +54,8 @@ class Company {
     };
   }
 
-  /** Create a company (from data), update db, return new company data.
+  /**
+   * Create a company (from data), update db, return new company data.
    *
    * data should be { handle, name, description, numEmployees, logoUrl }
    *
@@ -66,7 +63,6 @@ class Company {
    *
    * Throws BadRequestError if company already in database.
    * */
-
   static async create({ handle, name, description, numEmployees, logoUrl }) {
     const duplicateCheck = await db.query(
       `SELECT handle
@@ -87,7 +83,8 @@ class Company {
           logo_url)
            VALUES
              ($1, $2, $3, $4, $5)
-           RETURNING handle, name, description, num_employees AS "numEmployees", logo_url AS "logoUrl"`,
+           RETURNING handle, name, description, num_employees AS "numEmployees",
+            logo_url AS "logoUrl"`,
       [handle, name, description, numEmployees, logoUrl]
     );
     const company = result.rows[0];
@@ -95,7 +92,8 @@ class Company {
     return company;
   }
 
-  /** Filter for companies by search terms.
+  /**
+   * Filter for companies by search terms.
    *
    *  Search terms are optional.
    *
@@ -104,10 +102,9 @@ class Company {
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    *
    * If no results are found, then return the empty array.
+   *
    * If no search terms are given, then return all companies.
    * */
-
-  //UPDATE: combined w/ filter, left name but could change if we wanted.
   static async findAll(searchTerms = {}) {
 
     const { whereStatement, values } = Company.sqlForFindAll(searchTerms);
@@ -133,7 +130,6 @@ class Company {
    *
    * Throws NotFoundError if not found.
    **/
-
   static async get(handle) {
     const companyRes = await db.query(
       `SELECT handle,

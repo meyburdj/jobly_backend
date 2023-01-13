@@ -57,7 +57,7 @@ describe("ensureLoggedIn", function () {
     ensureLoggedIn(req, res, next);
   });
 
-  test("unauth if no login", function () {
+  test("fails: unauth if no login", function () {
     const req = {};
     const res = { locals: {} };
     expect(() => ensureLoggedIn(req, res, next)).toThrowError();
@@ -65,13 +65,13 @@ describe("ensureLoggedIn", function () {
 });
 
 describe("ensureAdmin", function () {
-  test("works", function () {
+  test("works: admin value = true", function () {
     const req = {};
     const res = { locals: { user: { isAdmin: true } } };
     ensureAdmin(req, res, next);
   });
 
-  test("unauth if no admin", function () {
+  test("fails: unauth if no admin", function () {
     const req = {};
     const res = { locals: { user: { isAdmin: false } } };
     expect(() => ensureAdmin(req, res, next)).toThrowError();
@@ -79,18 +79,18 @@ describe("ensureAdmin", function () {
 });
 
 describe("ensureAdmin", function () {
-  test("works", function () {
+  test("works: with admin value = true", function () {
     const req = {};
     const res = { locals: { user: { isAdmin: true } } };
     ensureSelfOrAdmin(req, res, next);
   });
 
-  test("unauth if no admin", function () {
+  test("fails: unauth if no admin", function () {
     const req = {};
     const res = { locals: { user: { isAdmin: false } } };
     expect(() => ensureSelfOrAdmin(req, res, next)).toThrowError();
   });
-  test("unauth if no logged in but not admin", function () {
+  test("fails: unauth if no logged in but not admin", function () {
     const req = {};
     const res = { locals: { user: { username: "test", isAdmin: false } } };
     expect(() => ensureSelfOrAdmin(req, res, next)).toThrowError();

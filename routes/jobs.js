@@ -98,7 +98,7 @@ router.get("/", async function (req, res, next) {
  */
 
 router.get("/:id", async function (req, res, next) {
-  const job = await Job.get(req.params.handle);
+  const job = await Job.get(req.params.id);
   return res.json({ job });
 });
 

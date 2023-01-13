@@ -4,7 +4,7 @@ const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 
-/** Related functions for companies. */
+/** Related functions for jobs. */
 
 class Job {
     /** TODO: Add docstrings. */

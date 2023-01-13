@@ -51,8 +51,6 @@ function ensureAdmin(req, res, next) {
 }
 function ensureSelfOrAdmin(req, res, next) {
   const user = res.locals.user;
-  // // const checks = [req.params.username, req.body.username, req]
-  // // check if admin || check if user is the
 
   if (!user.isAdmin && user.username !== req.params.username) {
     throw new UnauthorizedError("Access denied.");
