@@ -9,13 +9,13 @@ const { BadRequestError, NotFoundError } = require("../expressError");
 const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth");
 const Job = require("../models/job");
 
-const jobNewSchema = require("../schemas/jobNew.json");
-const jobUpdateSchema = require("../schemas/companyUpdate.json");
-const selectJobs = require("../schemas/selectCompanies.json");
+const jobNewSchema = require("../schemas/jobNewSchema.json");
+const jobUpdateSchema = require("../schemas/jobUpdateSchema.json");
+const selectJobs = require("../schemas/selectJobs.json");
 
 const router = new express.Router();
 
-const { sqlForPartialUpdate } = require("../helpers/sql.js");
+
 
 const db = require("../db");
 
@@ -30,6 +30,7 @@ const db = require("../db");
  */
 
 router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
+  console.log("I've hit the post route")
   const validator = jsonschema.validate(req.body, jobNewSchema, {
     required: true,
   });
@@ -56,14 +57,21 @@ router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
 router.get("/", async function (req, res, next) {
   //If there are no query paramaters then return all jobs
   if (
-    !(req.query.salary || req.query.equity || req.query.title)
+    !(req.query.minSalary || req.query.equity || req.query.titleLike)
   ) {
     const jobs = await Job.findAll();
     return res.json({ jobs });
   }
   //validate query
   let query = req.query;
-  if (query?.salary) { query.salary = parseInt(query.salary) }
+  console.log("query.equity: ", query.equity)
+  console.log("query.equity type: ", typeof query.equity)
+  if (query?.minSalary) { query.minSalary = parseInt(query.minSalary) }
+  if (query?.equity) {
+    query.equity = JSON.parse(query.equity);
+    console.log("query.equity jsoned: ", query.equity)
+    console.log("query.equity jsoned type: ", typeof query.equity)
+  }
 
 
   const validator = jsonschema.validate(query, selectJobs, {
@@ -75,9 +83,9 @@ router.get("/", async function (req, res, next) {
     throw new BadRequestError(errs);
   }
 
-
+  console.log("query at the end", query)
   // Calls filterCompanies with search query.
-  const jobs = await Job.findAll(req.query);
+  const jobs = await Job.findAll(query);
 
   return res.json({ jobs });
 });
@@ -110,6 +118,7 @@ router.patch(
   ensureLoggedIn,
   ensureAdmin,
   async function (req, res, next) {
+    console.log("i've hit the patch route")
     const validator = jsonschema.validate(req.body, jobUpdateSchema, {
       required: true,
     });

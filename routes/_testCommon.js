@@ -114,6 +114,12 @@ async function commonBeforeAll() {
     equity: "0.13",
     companyHandle: "c2"
   });
+  await Job.create({
+    title: "j4",
+    salary: 4000,
+    equity: "0.0",
+    companyHandle: "c2"
+  });
   const j1Query = await db.query(
     `SELECT id
          FROM jobs

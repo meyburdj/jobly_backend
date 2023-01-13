@@ -15,7 +15,7 @@ const selectCompanies = require("../schemas/selectCompanies.json");
 
 const router = new express.Router();
 
-const { sqlForPartialUpdate } = require("../helpers/sql.js");
+
 
 const db = require("../db");
 const { search } = require("superagent");
