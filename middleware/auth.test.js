@@ -5,7 +5,8 @@ const { UnauthorizedError } = require("../expressError");
 const {
   authenticateJWT,
   ensureLoggedIn,
-  ensureAdmin
+  ensureAdmin,
+  ensureSelfOrAdmin
 } = require("./auth");
 
 
@@ -77,4 +78,21 @@ describe("ensureAdmin", function () {
   });
 });
 
-//TODO: add for other middleware self or admin
+describe("ensureAdmin", function () {
+  test("works", function () {
+    const req = {};
+    const res = { locals: { user: { isAdmin: true } } };
+    ensureSelfOrAdmin(req, res, next);
+  });
+
+  test("unauth if no admin", function () {
+    const req = {};
+    const res = { locals: { user: { isAdmin: false } } };
+    expect(() => ensureSelfOrAdmin(req, res, next)).toThrowError();
+  });
+  test("unauth if no logged in but not admin", function () {
+    const req = {};
+    const res = { locals: { user: { username: "test", isAdmin: false } } };
+    expect(() => ensureSelfOrAdmin(req, res, next)).toThrowError();
+  });
+});

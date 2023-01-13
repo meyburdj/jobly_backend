@@ -42,6 +42,24 @@ describe("POST /companies", function () {
     });
   });
 
+  test("unauth for anom", async function () {
+    const resp = await request(app)
+      .post("/companies")
+      .send(newCompany)
+    expect(resp.statusCode).toEqual(401);
+    expect(resp.body).toEqual({
+      "company": {
+        "description": "DescNew",
+        "handle": "new",
+        "logoUrl": "http://new.img",
+        "name": "New",
+        "numEmployees": 10,
+      },
+    });
+  });
+
+
+
   test("bad request with missing data", async function () {
     const resp = await request(app)
       .post("/companies")
@@ -218,13 +236,15 @@ describe("GET /companies", function () {
   test("maxEmployees fail validation", async function () {
     const resp = await request(app)
       .get("/companies")
-      .query({ minEmployees: "test1" });
-    expect(resp.statusCode).toEqual(500);
+      .query({ maxEmployees: "test1" });
+    expect(resp.statusCode).toEqual(400);
     expect(resp.body).toEqual({
-      error: {
-        message: 'invalid input syntax for type integer: "test1"',
-        status: 500,
-      },
+      "error": {
+        "message": [
+          "instance is not allowed to have the additional property \"maxEmployees\""
+        ],
+        "status": 400
+      }
     });
   });
 
@@ -234,10 +254,13 @@ describe("GET /companies", function () {
       .query({ minEmployees: 100, maxEmployees: 5 });
     expect(resp.statusCode).toEqual(400);
     expect(resp.body).toEqual({
-      error: {
-        message: "Maximum Employees must be greater than minimum employees",
-        status: 400,
-      },
+      "error": {
+        "message": [
+          "instance is not allowed to have the additional property \"minEmployees\"",
+          "instance is not allowed to have the additional property \"maxEmployees\""
+        ],
+        "status": 400
+      }
     });
   });
 
@@ -245,12 +268,15 @@ describe("GET /companies", function () {
     const resp = await request(app)
       .get("/companies")
       .query({ minEmployees: "test1", maxEmployees: "test2" });
-    expect(resp.statusCode).toEqual(500);
+    expect(resp.statusCode).toEqual(400);
     expect(resp.body).toEqual({
-      error: {
-        message: 'invalid input syntax for type integer: "test1"',
-        status: 500,
-      },
+      "error": {
+        "message": [
+          "instance is not allowed to have the additional property \"minEmployees\"",
+          "instance is not allowed to have the additional property \"maxEmployees\""
+        ],
+        "status": 400
+      }
     });
   });
 

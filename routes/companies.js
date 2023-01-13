@@ -88,6 +88,12 @@ router.get("/", async function (req, res, next) {
 });
 
 //TODO: added docstring
+/** gets information on a specific company by handle   
+ * returns:
+ * { handle, name, description, numEmployees, logoUrl } 
+ *
+ * Authorization required: none
+ */
 router.get("/:handle", async function (req, res, next) {
   const company = await Company.get(req.params.handle);
   return res.json({ company });

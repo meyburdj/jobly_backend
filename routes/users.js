@@ -9,7 +9,7 @@ const {
   authenticateJWT,
   ensureLoggedIn,
   ensureAdmin,
-  ensureSelfOrAdimin,
+  ensureSelfOrAdmin,
 } = require("../middleware/auth");
 const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
@@ -64,7 +64,7 @@ router.get("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
  * Authorization required: admin or this user
  **/
 
-router.get("/:username", ensureLoggedIn, ensureSelfOrAdimin, async function (req, res, next) {
+router.get("/:username", ensureLoggedIn, ensureSelfOrAdmin, async function (req, res, next) {
   const user = await User.get(req.params.username);
   return res.json({ user });
 });
@@ -79,7 +79,7 @@ router.get("/:username", ensureLoggedIn, ensureSelfOrAdimin, async function (req
  * Authorization required: admin or this user
  **/
 
-router.patch("/:username", ensureLoggedIn, ensureSelfOrAdimin, async function (req, res, next) {
+router.patch("/:username", ensureLoggedIn, ensureSelfOrAdmin, async function (req, res, next) {
   const validator = jsonschema.validate(req.body, userUpdateSchema, {
     required: true,
   });
@@ -97,7 +97,7 @@ router.patch("/:username", ensureLoggedIn, ensureSelfOrAdimin, async function (r
  * Authorization required: admin or this user.
  **/
 
-router.delete("/:username", ensureLoggedIn, ensureSelfOrAdimin, async function (req, res, next) {
+router.delete("/:username", ensureLoggedIn, ensureSelfOrAdmin, async function (req, res, next) {
   await User.remove(req.params.username);
   return res.json({ deleted: req.params.username });
 });

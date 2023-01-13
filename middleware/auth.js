@@ -49,8 +49,7 @@ function ensureAdmin(req, res, next) {
 
   return next();
 }
-//TODO: fix adimin everywhere
-function ensureSelfOrAdimin(req, res, next) {
+function ensureSelfOrAdmin(req, res, next) {
   const user = res.locals.user;
   // // const checks = [req.params.username, req.body.username, req]
   // // check if admin || check if user is the
@@ -66,5 +65,5 @@ module.exports = {
   authenticateJWT,
   ensureLoggedIn,
   ensureAdmin,
-  ensureSelfOrAdimin
+  ensureSelfOrAdmin
 };
