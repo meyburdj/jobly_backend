@@ -1,22 +1,20 @@
 const { BadRequestError } = require("../expressError");
 
 /**
- *  Prevents sql injection by taking in key value pairs for datatoUpdate
- *  and provides inputs useable in a sql querry to sanitize the data
+ * Helper for making selective update queries.
  *
- *  Takes in dataToUpdate and jsToSql:
- *  dataToUpdate can include:
- * {columName1: columnName1Value, columnName2: columnName2Value...}
+ * The calling function can use it to make the SET clause of an SQL UPDATE
+ * statement.
  *
- *  jsToSql will have the conversion of these keys from camelCase to snake_case:
- * {columnName1: "column_name_1", columnName2: "column_name_2"...}
+ * @param dataToUpdate {Object} {field1: newVal, field2: newVal, ...}
+ * @param jsToSql {Object} maps js-style data fields to database column names,
+ *   like { firstName: "first_name", age: "age" }
  *
- * Takes keys from jsToSql and creates string that will have a SET query string
- * with the column equal to the correct $int
+ * @returns {Object} {sqlSetCols, dataToUpdate}
  *
- *  Returns an object with two keys:
- *    {SetCol: 'column_name_1' = $1, 'column_name_2' = $2, ...,
- *    Values: [columnName1Value, columnName2Value...] }
+ * @example {firstName: 'Aliya', age: 32} =>
+ *   { setCols: '"first_name"=$1, "age"=$2',
+ *     values: ['Aliya', 32] }
  */
 
 function sqlForPartialUpdate(dataToUpdate, jsToSql) {
