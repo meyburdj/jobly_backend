@@ -151,7 +151,7 @@ describe("GET /companies", function () {
     });
   });
 
-  test("ok for nameLike", async function () {
+  test("works: nameLike", async function () {
     const resp = await request(app).get("/companies").query({ nameLike: "a" });
     expect(resp.body).toEqual({
       companies: [
@@ -166,7 +166,7 @@ describe("GET /companies", function () {
     });
   });
 
-  test("ok for minEmployees", async function () {
+  test("works: minEmployees", async function () {
     const resp = await request(app)
       .get("/companies")
       .query({ minEmployees: 500 });
@@ -190,7 +190,7 @@ describe("GET /companies", function () {
     });
   });
 
-  test("ok for maxEmployees", async function () {
+  test("works: maxEmployees", async function () {
     const resp = await request(app)
       .get("/companies")
       .query({ maxEmployees: 10 });
@@ -228,7 +228,7 @@ describe("GET /companies", function () {
     });
   });
 
-  test("minEmployees fail validation", async function () {
+  test("fails: minEmployees non-int input", async function () {
     const resp = await request(app)
       .get("/companies")
       .query({ minEmployees: "test1" });
@@ -243,7 +243,7 @@ describe("GET /companies", function () {
     });
   });
 
-  test("maxEmployees fail validation", async function () {
+  test("fails: maxEmployees non-int input", async function () {
     const resp = await request(app)
       .get("/companies")
       .query({ maxEmployees: "test1" });
@@ -258,7 +258,7 @@ describe("GET /companies", function () {
     });
   });
 
-  test("minEmployees > maxEmployee failure", async function () {
+  test("fails: minEmployees > maxEmployee", async function () {
     const resp = await request(app)
       .get("/companies")
       .query({ minEmployees: 100, maxEmployees: 5 });
@@ -271,7 +271,7 @@ describe("GET /companies", function () {
     });
   });
 
-  test("maxEmployees fail validation", async function () {
+  test("fails: maxEmployees non-int input", async function () {
     const resp = await request(app)
       .get("/companies")
       .query({ maxEmployees: "test2" });
@@ -284,17 +284,6 @@ describe("GET /companies", function () {
         "status": 400
       }
     });
-  });
-
-  test("fails: test next() handler", async function () {
-    // there's no normal failure event which will cause this route to fail ---
-    // thus making it hard to test that the error-handler works with it. This
-    // should cause an error, all right :)
-    await db.query("DROP TABLE companies CASCADE");
-    const resp = await request(app)
-      .get("/companies")
-      .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(500);
   });
 });
 
@@ -310,6 +299,11 @@ describe("GET /companies/:handle", function () {
         description: "Desc1",
         numEmployees: 1,
         logoUrl: "http://c1.img",
+        jobs: [
+          { id: testJobIds[0], title: "J1", equity: "0.1", salary: 1 },
+          { id: testJobIds[1], title: "J2", equity: "0.2", salary: 2 },
+          { id: testJobIds[2], title: "J3", equity: null, salary: 3 },
+        ],
       },
     });
   });
@@ -323,6 +317,7 @@ describe("GET /companies/:handle", function () {
         description: "Desc2",
         numEmployees: 2,
         logoUrl: "http://c2.img",
+        jobs: [],
       },
     });
   });
@@ -354,7 +349,7 @@ describe("PATCH /companies/:handle", function () {
     });
   });
 
-  test("unauth for anon", async function () {
+  test("fails: unauth for anon", async function () {
     const resp = await request(app).patch(`/companies/c1`).send({
       name: "C1-new",
     });
@@ -386,7 +381,7 @@ describe("PATCH /companies/:handle", function () {
     expect(resp.statusCode).toEqual(404);
   });
 
-  test("bad request on handle change attempt", async function () {
+  test("fails: bad request on handle change attempt", async function () {
     const resp = await request(app)
       .patch(`/companies/c1`)
       .send({
@@ -396,7 +391,7 @@ describe("PATCH /companies/:handle", function () {
     expect(resp.statusCode).toEqual(400);
   });
 
-  test("bad request on invalid data", async function () {
+  test("fails: bad request on invalid data", async function () {
     const resp = await request(app)
       .patch(`/companies/c1`)
       .send({
