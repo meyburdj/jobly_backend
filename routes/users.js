@@ -3,16 +3,15 @@
 /** Routes for users. */
 
 const jsonschema = require("jsonschema");
-
 const express = require("express");
+
 const {
-  ensureLoggedIn,
   ensureAdmin,
   ensureSelfOrAdmin,
 } = require("../middleware/auth");
 const { BadRequestError } = require("../expressError");
-const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
+const User = require("../models/user");
 const userNewSchema = require("../schemas/userNew.json");
 const userUpdateSchema = require("../schemas/userUpdate.json");
 
@@ -30,7 +29,7 @@ const router = express.Router();
  * Authorization required: login, admin
  **/
 
-router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
+router.post("/", ensureAdmin, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, userNewSchema, {
       required: true,
@@ -55,7 +54,7 @@ router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
  * Authorization required: admin
  **/
 
-router.get("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
+router.get("/", ensureAdmin, async function (req, res, next) {
   try {
     const users = await User.findAll();
     return res.json({ users });
@@ -69,12 +68,11 @@ router.get("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
  * Returns { username, firstName, lastName, isAdmin, jobs }
  *   where jobs is { id, title, companyHandle, companyName, state }
  *
- * Authorization required: admin or this user
+ * Authorization required: admin or logged in user (same user-as-:username)
  **/
 
 router.get(
   "/:username",
-  ensureLoggedIn,
   ensureSelfOrAdmin,
   async function (req, res, next) {
     try {
@@ -93,12 +91,11 @@ router.get(
  *
  * Returns { username, firstName, lastName, email, isAdmin }
  *
- * Authorization required: admin or this user
+ * Authorization required: admin or logged in user (same user-as-:username)
  **/
 
 router.patch(
   "/:username",
-  ensureLoggedIn,
   ensureSelfOrAdmin,
   async function (req, res, next) {
     try {
@@ -120,12 +117,11 @@ router.patch(
 
 /** DELETE /[username]  =>  { deleted: username }
  *
- * Authorization required: admin or this user
+ * Authorization required: admin or logged in user (same user-as-:username)
  **/
 
 router.delete(
   "/:username",
-  ensureLoggedIn,
   ensureSelfOrAdmin,
   async function (req, res, next) {
     try {
@@ -141,10 +137,10 @@ router.delete(
  *
  * Returns {"applied": jobId}
  *
- * Authorization required: admin or this user
+ * Authorization required: admin or logged in user (same user-as-:username)
  * */
 
-router.post("/:username/jobs/:id", ensureLoggedIn, ensureSelfOrAdmin, async function (req, res, next) {
+router.post("/:username/jobs/:id", ensureSelfOrAdmin, async function (req, res, next) {
   try {
     const jobId = +req.params.id;
     await User.applyToJob(req.params.username, jobId);

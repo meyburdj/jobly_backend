@@ -5,3 +5,6 @@
   a. mock the data
   b. rollback db each time so that getting an id would always be consistent
   c. test to see if it is a type of int
+Solution: went with c, simple and quick.
+
+2. users.test.js - Two test failures for applications, feature not used just yet.

@@ -11,6 +11,7 @@ const {
   commonBeforeEach,
   commonAfterEach,
   commonAfterAll,
+  testJobIds,
   u1Token,
   u2Token,
   adminToken,
@@ -101,7 +102,7 @@ describe("POST /users", function () {
     expect(resp.statusCode).toEqual(401);
     expect(resp.body).toEqual({
       "error": {
-        "message": "Requires admin",
+        "message": "Unauthorized",
         "status": 401
       }
     });
