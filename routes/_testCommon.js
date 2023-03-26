@@ -13,8 +13,7 @@ async function commonBeforeAll() {
   await db.query("DELETE FROM users");
   // noinspection SqlWithoutWhere
   await db.query("DELETE FROM companies");
-  // noinspection SqlWithoutWhere
-  // await db.query("DELETE FROM jobs");
+
 
   await Company.create({
     handle: "c1",
@@ -36,36 +35,6 @@ async function commonBeforeAll() {
     numEmployees: 3,
     description: "Desc3",
     logoUrl: "http://c3.img",
-  });
-  await Company.create({
-    handle: "c33",
-    name: "C33",
-    numEmployees: 50,
-    description: "Desc33",
-    logoUrl: "http://c33.img",
-  });
-
-  await Company.create({
-    handle: "c34",
-    name: "C4",
-    numEmployees: 1,
-    description: "Desc34",
-    logoUrl: "http://c34.img",
-  });
-
-  await Company.create({
-    handle: "c35",
-    name: "C44",
-    numEmployees: 999,
-    description: "Desc35",
-    logoUrl: "http://c35.img",
-  });
-  await Company.create({
-    handle: "a",
-    name: "a",
-    numEmployees: 999,
-    description: "a",
-    logoUrl: "http://c35.img",
   });
 
   testJobIds[0] = (
@@ -125,31 +94,8 @@ async function commonBeforeAll() {
     password: "adminadmin",
     isAdmin: true,
   });
-  // await Job.create({
-  //   title: "j1",
-  //   salary: 1000,
-  //   equity: "0.1",
-  //   companyHandle: "c1",
-  // });
-  // await Job.create({
-  //   title: "j2",
-  //   salary: 2000,
-  //   equity: "0.12",
-  //   companyHandle: "c1",
-  // });
-  // await Job.create({
-  //   title: "j3",
-  //   salary: 3000,
-  //   equity: "0.13",
-  //   companyHandle: "c2",
-  // });
-  // await Job.create({
-  //   title: "j4",
-  //   salary: 4000,
-  //   equity: "0.0",
-  //   companyHandle: "c2",
-  // });
-  // await User.applyToJob("u1", testJobIds[0]);
+
+  await User.applyToJob("u1", testJobIds[0]);
 }
 
 async function commonBeforeEach() {

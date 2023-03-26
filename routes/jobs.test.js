@@ -2,7 +2,6 @@
 
 const request = require("supertest");
 
-const db = require("../db");
 const app = require("../app");
 
 const {
@@ -10,6 +9,7 @@ const {
   commonBeforeEach,
   commonAfterEach,
   commonAfterAll,
+  testJobIds,
   u1Token,
   adminToken,
 } = require("./_testCommon");

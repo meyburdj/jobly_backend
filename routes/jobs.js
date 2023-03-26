@@ -1,24 +1,19 @@
 "uses strict";
 
-/** Routes for companies. */
+/** Routes for jobs. */
 
 const jsonschema = require("jsonschema");
 const express = require("express");
 
-const { BadRequestError, NotFoundError } = require("../expressError");
-const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth");
+const { BadRequestError } = require("../expressError");
+const { ensureAdmin } = require("../middleware/auth");
 const Job = require("../models/job");
 
 const jobNewSchema = require("../schemas/jobNewSchema.json");
 const jobUpdateSchema = require("../schemas/jobUpdateSchema.json");
-const selectJobs = require("../schemas/selectJobs.json");
+const jobSearchSchema = require("../schemas/jobSearchSchema.json");
 
-const router = new express.Router();
-
-
-
-const db = require("../db");
-
+const router = new express.Router({ mergeParams: true });
 
 /** POST / { job } =>  { job }
  *
@@ -26,11 +21,11 @@ const db = require("../db");
  *
  * Returns { title, salary, equity, companyHandle }
  *
- * Authorization required: login & admin
+ * Authorization required:  admin
  */
 
-router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
-  console.log("I've hit the post route")
+router.post("/", ensureAdmin, async function (req, res, next) {
+  console.log("I've hit the post route");
   const validator = jsonschema.validate(req.body, jobNewSchema, {
     required: true,
   });
@@ -44,7 +39,7 @@ router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
 });
 
 /** GET /  =>
- *   { jobs: [{ title, salary, equity, companyHandle }, ...] }
+ *  { jobs: [ { id, title, salary, equity, companyHandle, companyName }, ...] }
  *
  * Can filter on provided search filters:
  * - salary
@@ -55,26 +50,12 @@ router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-  //If there are no query paramaters then return all jobs
-  if (
-    !(req.query.minSalary || req.query.equity || req.query.titleLike)
-  ) {
-    const jobs = await Job.findAll();
-    return res.json({ jobs });
-  }
-  //validate query
   let query = req.query;
-  console.log("query.equity: ", query.equity)
-  console.log("query.equity type: ", typeof query.equity)
-  if (query?.minSalary) { query.minSalary = parseInt(query.minSalary) }
-  if (query?.equity) {
-    query.equity = JSON.parse(query.equity);
-    console.log("query.equity jsoned: ", query.equity)
-    console.log("query.equity jsoned type: ", typeof query.equity)
-  }
+  // need to convert salary to int, and equity to bool, arrive as type string
+  if (query?.minSalary) query.minSalary = +query.minSalary;
+  if (query?.equity) query.equity === "true";
 
-
-  const validator = jsonschema.validate(query, selectJobs, {
+  const validator = jsonschema.validate(query, jobSearchSchema, {
     required: true,
   });
 
@@ -83,16 +64,14 @@ router.get("/", async function (req, res, next) {
     throw new BadRequestError(errs);
   }
 
-  console.log("query at the end", query)
-  // Calls filterCompanies with search query.
   const jobs = await Job.findAll(query);
-
   return res.json({ jobs });
 });
 
-/** gets information on a specific job by id
- * returns:
- * { handle, name, description, numEmployees, logoUrl }
+/** GET /[jobId] => { job }
+ *
+ * Returns { id, title, salary, equity, company }
+ *   where company is { handle, name, description, numEmployees, logoUrl }
  *
  * Authorization required: none
  */
@@ -102,23 +81,19 @@ router.get("/:id", async function (req, res, next) {
   return res.json({ job });
 });
 
-/** PATCH /[id] { fld1, fld2, ... } => { job }
+/** PATCH /[jobId]  { fld1, fld2, ... } => { job }
  *
- * Patches job data.
- *
- * fields can be: { title, salary, equity, company_handle }
+ * Data can include: { title, salary, equity }
  *
  * Returns { id, title, salary, equity, companyHandle }
  *
- * Authorization required: login, admin
+ * Authorization required: admin
  */
 
 router.patch(
   "/:id",
-  ensureLoggedIn,
   ensureAdmin,
   async function (req, res, next) {
-    console.log("i've hit the patch route")
     const validator = jsonschema.validate(req.body, jobUpdateSchema, {
       required: true,
     });
@@ -132,18 +107,17 @@ router.patch(
   }
 );
 
-/** DELETE /[id]  =>  { deleted: id }
+/** DELETE /[handle]  =>  { deleted: id }
  *
- * Authorization: login, admin
+ * Authorization required: admin
  */
 
 router.delete(
   "/:id",
-  ensureLoggedIn,
   ensureAdmin,
   async function (req, res, next) {
     await Job.remove(req.params.id);
-    return res.json({ deleted: req.params.id });
+    return res.json({ deleted: +req.params.id });
   }
 );
 

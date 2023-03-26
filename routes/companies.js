@@ -11,7 +11,7 @@ const Company = require("../models/company");
 
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
-const selectCompanies = require("../schemas/selectCompanies.json");
+const companySearchSchema = require("../schemas/companySearchSchema.json");
 
 const router = new express.Router();
 
@@ -50,7 +50,7 @@ router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
   let query = req.query;
-  // need to convert to int, arrive as query string
+  // need to convert query strings to integers
   if (query?.minEmployees) query.minEmployees = +query.minEmployees;
   if (query?.maxEmployees) query.maxEmployees = +query.maxEmployees;
 
@@ -60,7 +60,7 @@ router.get("/", async function (req, res, next) {
     );
   }
 
-  const validator = jsonschema.validate(query, selectCompanies, {
+  const validator = jsonschema.validate(query, companySearchSchema, {
     required: true,
   });
 

@@ -5,13 +5,13 @@ const bcrypt = require("bcrypt");
 const db = require("../db.js");
 const { BCRYPT_WORK_FACTOR } = require("../config");
 
+const testJobIds = [];
+
 async function commonBeforeAll() {
   // noinspection SqlWithoutWhere
   await db.query("DELETE FROM companies");
   // noinspection SqlWithoutWhere
   await db.query("DELETE FROM users");
-  // noinspection SqlWithoutWhere
-  await db.query("DELETE FROM jobs");
 
   await db.query(`
     INSERT INTO companies(handle, name, num_employees, description, logo_url)
@@ -19,13 +19,17 @@ async function commonBeforeAll() {
            ('c2', 'C2', 2, 'Desc2', 'http://c2.img'),
            ('c3', 'C3', 3, 'Desc3', 'http://c3.img')`);
 
-  await db.query(`
-    INSERT INTO jobs(title, salary, equity, company_handle)
-    VALUES ('j1', 100, 0.15, 'c1'),
-            ('j2', 200, 0.25, 'c1'),
-           ('j3', '300', 0.05, 'c2')`);
+  const resultsJobs = await db.query(`
+           INSERT INTO jobs (title, salary, equity, company_handle)
+           VALUES ('Job1', 100, '0.1', 'c1'),
+                  ('Job2', 200, '0.2', 'c1'),
+                  ('Job3', 300, '0', 'c1'),
+                  ('Job4', NULL, NULL, 'c1')
+           RETURNING id`);
+  testJobIds.splice(0, 0, ...resultsJobs.rows.map((r) => r.id));
 
-  await db.query(`
+  await db.query(
+    `
         INSERT INTO users(username,
                           password,
                           first_name,
@@ -37,25 +41,34 @@ async function commonBeforeAll() {
     [
       await bcrypt.hash("password1", BCRYPT_WORK_FACTOR),
       await bcrypt.hash("password2", BCRYPT_WORK_FACTOR),
-    ]);
-  }
+    ]
+  );
 
-  async function commonBeforeEach() {
-    await db.query("BEGIN");
-  }
+  await db.query(
+    `
+        INSERT INTO applications(username, job_id)
+        VALUES ('u1', $1)`,
+    [testJobIds[0]]
+  );
+  console.log("testJobsIDS HERE:", testJobIds);
+}
 
-  async function commonAfterEach() {
-    await db.query("ROLLBACK");
-  }
+async function commonBeforeEach() {
+  await db.query("BEGIN");
+}
 
-  async function commonAfterAll() {
-    await db.end();
-  }
+async function commonAfterEach() {
+  await db.query("ROLLBACK");
+}
 
+async function commonAfterAll() {
+  await db.end();
+}
 
 module.exports = {
   commonBeforeAll,
   commonBeforeEach,
   commonAfterEach,
   commonAfterAll,
+  testJobIds,
 };
