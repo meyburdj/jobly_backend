@@ -17,7 +17,9 @@ const { UnauthorizedError } = require("../expressError");
 function authenticateJWT(req, res, next) {
   try {
     const authHeader = req.headers && req.headers.authorization;
+    console.log("authHeader", authHeader);
     if (authHeader) {
+      // remove "[Bb]earer" from header"
       const token = authHeader.replace(/^[Bb]earer /, "").trim();
       res.locals.user = jwt.verify(token, SECRET_KEY);
     }
@@ -33,27 +35,27 @@ function authenticateJWT(req, res, next) {
  */
 
 function ensureLoggedIn(req, res, next) {
-  if (!res.locals.user?.username)
-    throw new UnauthorizedError("Must be logged in");
-
+  if (!res.locals.user) throw new UnauthorizedError();
   return next();
 }
 
-/** Middleware to use when they must be adminn.
+/** Middleware to use when user must be logged in as an admin.
  *
- * If not, raises Unauthorized.
+ *  If not, raises Unauthorized.
  */
 
 function ensureAdmin(req, res, next) {
-  if (!res.locals.user?.isAdmin) throw new UnauthorizedError("Requires admin");
-
+  if (!res.locals.user || !res.locals.user.isAdmin) {
+    throw new UnauthorizedError();
+  }
   return next();
 }
+
 function ensureSelfOrAdmin(req, res, next) {
   const user = res.locals.user;
 
-  if (!user.isAdmin && user.username !== req.params.username) {
-    throw new UnauthorizedError("Access denied.");
+  if (!(user && (user.isAdmin || user.username === req.params.username))) {
+    throw new UnauthorizedError();
   }
   return next();
 }
@@ -62,5 +64,5 @@ module.exports = {
   authenticateJWT,
   ensureLoggedIn,
   ensureAdmin,
-  ensureSelfOrAdmin
+  ensureSelfOrAdmin,
 };

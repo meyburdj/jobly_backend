@@ -6,19 +6,16 @@ const {
   authenticateJWT,
   ensureLoggedIn,
   ensureAdmin,
-  ensureSelfOrAdmin
+  ensureSelfOrAdmin,
 } = require("./auth");
-
-
-const { SECRET_KEY } = require("../config");
-const testJwt = jwt.sign({ username: "test", isAdmin: false }, SECRET_KEY);
-const badJwt = jwt.sign({ username: "test", isAdmin: false }, "wrong");
-const testAdmin = jwt.sign({ username: "admin", isAdmin: true }, SECRET_KEY);
-
 
 function next(err) {
   if (err) throw new Error("Got error from middleware");
 }
+
+const { SECRET_KEY } = require("../config");
+const testJwt = jwt.sign({ username: "test", isAdmin: false }, SECRET_KEY);
+const badJwt = jwt.sign({ username: "test", isAdmin: false }, "wrong");
 
 describe("authenticateJWT", function () {
   test("works: via header", function () {
@@ -49,15 +46,14 @@ describe("authenticateJWT", function () {
   });
 });
 
-
 describe("ensureLoggedIn", function () {
-  test("works", function () {
+  test("works:", function () {
     const req = {};
     const res = { locals: { user: { username: "test" } } };
     ensureLoggedIn(req, res, next);
   });
 
-  test("fails: unauth if no login", function () {
+  test("unauth if not logged in", function () {
     const req = {};
     const res = { locals: {} };
     expect(() => ensureLoggedIn(req, res, next)).toThrowError();
@@ -65,34 +61,49 @@ describe("ensureLoggedIn", function () {
 });
 
 describe("ensureAdmin", function () {
-  test("works: admin value = true", function () {
+  test("works: is admin", function () {
     const req = {};
-    const res = { locals: { user: { isAdmin: true } } };
+    const res = { locals: { user: { username: "test", isAdmin: true } } };
     ensureAdmin(req, res, next);
   });
 
-  test("fails: unauth if no admin", function () {
+  test("unauth if no admin", function () {
     const req = {};
-    const res = { locals: { user: { isAdmin: false } } };
+    const res = { locals: { user: { username: "test", isAdmin: false } } };
     expect(() => ensureAdmin(req, res, next)).toThrowError();
+  });
+  test("unauth if anon", function () {
+    const req = {};
+    const res = { locals: {} };
+    expect(() => ensureAdmin(req, res, next))
+        .toThrow(UnauthorizedError);
   });
 });
 
-describe("ensureAdmin", function () {
-  test("works: with admin value = true", function () {
-    const req = {};
-    const res = { locals: { user: { isAdmin: true } } };
+describe("ensureSelfOrAdmin", function () {
+  test("works: admin", function () {
+    const req = { params: { username: "test" } };
+    const res = { locals: { user: { username: "admin", isAdmin: true } } };
     ensureSelfOrAdmin(req, res, next);
   });
 
-  test("fails: unauth if no admin", function () {
-    const req = {};
-    const res = { locals: { user: { isAdmin: false } } };
-    expect(() => ensureSelfOrAdmin(req, res, next)).toThrowError();
-  });
-  test("fails: unauth if no logged in but not admin", function () {
-    const req = {};
+  test("works: same user", function () {
+    const req = { params: { username: "test" } };
     const res = { locals: { user: { username: "test", isAdmin: false } } };
-    expect(() => ensureSelfOrAdmin(req, res, next)).toThrowError();
+    ensureSelfOrAdmin(req, res, next);
+  });
+
+  test("unauth: mismatch", function () {
+    const req = { params: { username: "wrong" } };
+    const res = { locals: { user: { username: "test", isAdmin: false } } };
+    expect(() => ensureSelfOrAdmin(req, res, next))
+        .toThrow(UnauthorizedError);
+  });
+
+  test("unauth: if anon", function () {
+    const req = { params: { username: "test" } };
+    const res = { locals: {} };
+    expect(() => ensureSelfOrAdmin(req, res, next))
+        .toThrow(UnauthorizedError);
   });
 });

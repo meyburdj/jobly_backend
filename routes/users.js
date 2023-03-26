@@ -6,7 +6,6 @@ const jsonschema = require("jsonschema");
 
 const express = require("express");
 const {
-  authenticateJWT,
   ensureLoggedIn,
   ensureAdmin,
   ensureSelfOrAdmin,
@@ -32,17 +31,21 @@ const router = express.Router();
  **/
 
 router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
-  const validator = jsonschema.validate(req.body, userNewSchema, {
-    required: true,
-  });
-  if (!validator.valid) {
-    const errs = validator.errors.map((e) => e.stack);
-    throw new BadRequestError(errs);
-  }
+  try {
+    const validator = jsonschema.validate(req.body, userNewSchema, {
+      required: true,
+    });
+    if (!validator.valid) {
+      const errs = validator.errors.map((e) => e.stack);
+      throw new BadRequestError(errs);
+    }
 
-  const user = await User.register(req.body);
-  const token = createToken(user);
-  return res.status(201).json({ user, token });
+    const user = await User.register(req.body);
+    const token = createToken(user);
+    return res.status(201).json({ user, token });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 /** GET / => { users: [ {username, firstName, lastName, email }, ... ] }
@@ -53,21 +56,35 @@ router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
  **/
 
 router.get("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
-  const users = await User.findAll();
-  return res.json({ users });
+  try {
+    const users = await User.findAll();
+    return res.json({ users });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 /** GET /[username] => { user }
  *
- * Returns { username, firstName, lastName, isAdmin }
+ * Returns { username, firstName, lastName, isAdmin, jobs }
+ *   where jobs is { id, title, companyHandle, companyName, state }
  *
  * Authorization required: admin or this user
  **/
 
-router.get("/:username", ensureLoggedIn, ensureSelfOrAdmin, async function (req, res, next) {
-  const user = await User.get(req.params.username);
-  return res.json({ user });
-});
+router.get(
+  "/:username",
+  ensureLoggedIn,
+  ensureSelfOrAdmin,
+  async function (req, res, next) {
+    try {
+      const user = await User.get(req.params.username);
+      return res.json({ user });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
 
 /** PATCH /[username] { user } => { user }
  *
@@ -79,38 +96,63 @@ router.get("/:username", ensureLoggedIn, ensureSelfOrAdmin, async function (req,
  * Authorization required: admin or this user
  **/
 
-router.patch("/:username", ensureLoggedIn, ensureSelfOrAdmin, async function (req, res, next) {
-  const validator = jsonschema.validate(req.body, userUpdateSchema, {
-    required: true,
-  });
-  if (!validator.valid) {
-    const errs = validator.errors.map((e) => e.stack);
-    throw new BadRequestError(errs);
-  }
+router.patch(
+  "/:username",
+  ensureLoggedIn,
+  ensureSelfOrAdmin,
+  async function (req, res, next) {
+    try {
+      const validator = jsonschema.validate(req.body, userUpdateSchema, {
+        required: true,
+      });
+      if (!validator.valid) {
+        const errs = validator.errors.map((e) => e.stack);
+        throw new BadRequestError(errs);
+      }
 
-  const user = await User.update(req.params.username, req.body);
-  return res.json({ user });
-});
+      const user = await User.update(req.params.username, req.body);
+      return res.json({ user });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
 
 /** DELETE /[username]  =>  { deleted: username }
  *
- * Authorization required: admin or this user.
+ * Authorization required: admin or this user
  **/
 
-router.delete("/:username", ensureLoggedIn, ensureSelfOrAdmin, async function (req, res, next) {
-  await User.remove(req.params.username);
-  return res.json({ deleted: req.params.username });
+router.delete(
+  "/:username",
+  ensureLoggedIn,
+  ensureSelfOrAdmin,
+  async function (req, res, next) {
+    try {
+      await User.remove(req.params.username);
+      return res.json({ deleted: req.params.username });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+/** POST /[username]/jobs/[id]  { state } => { application }
+ *
+ * Returns {"applied": jobId}
+ *
+ * Authorization required: admin or this user
+ * */
+
+router.post("/:username/jobs/:id", ensureLoggedIn, ensureSelfOrAdmin, async function (req, res, next) {
+  try {
+    const jobId = +req.params.id;
+    await User.applyToJob(req.params.username, jobId);
+    return res.json({ applied: jobId });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 module.exports = router;
 
-
-
-
-// // {
-// 	"username": "JesseLovesTrash",
-// 	"password": "abc123"
-// }
-// {
-// 	"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ikplc3NlTG92ZXNUcmFzaCIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE2NzM0NjI2NTV9.hOjMhZvsmXShSgJ5nNkxP-Ee8EV9b9GGXSBLNdYd5p0"
-// }

@@ -5,7 +5,8 @@ const User = require("../models/user");
 const Company = require("../models/company");
 const { createToken } = require("../helpers/tokens");
 const Job = require("../models/job.js");
-let jobId;
+
+const testJobIds = [];
 
 async function commonBeforeAll() {
   // noinspection SqlWithoutWhere
@@ -13,7 +14,7 @@ async function commonBeforeAll() {
   // noinspection SqlWithoutWhere
   await db.query("DELETE FROM companies");
   // noinspection SqlWithoutWhere
-  await db.query("DELETE FROM jobs");
+  // await db.query("DELETE FROM jobs");
 
   await Company.create({
     handle: "c1",
@@ -67,6 +68,31 @@ async function commonBeforeAll() {
     logoUrl: "http://c35.img",
   });
 
+  testJobIds[0] = (
+    await Job.create({
+      title: "J1",
+      salary: 1,
+      equity: "0.1",
+      companyHandle: "c1",
+    })
+  ).id;
+  testJobIds[1] = (
+    await Job.create({
+      title: "J2",
+      salary: 2,
+      equity: "0.2",
+      companyHandle: "c1",
+    })
+  ).id;
+  testJobIds[2] = (
+    await Job.create({
+      title: "J3",
+      salary: 3,
+      /* equity null */
+      companyHandle: "c1",
+    })
+  ).id;
+
   await User.register({
     username: "u1",
     firstName: "U1F",
@@ -99,30 +125,31 @@ async function commonBeforeAll() {
     password: "adminadmin",
     isAdmin: true,
   });
-  await Job.create({
-    title: "j1",
-    salary: 1000,
-    equity: "0.1",
-    companyHandle: "c1"
-  });
-  await Job.create({
-    title: "j2",
-    salary: 2000,
-    equity: "0.12",
-    companyHandle: "c1"
-  });
-  await Job.create({
-    title: "j3",
-    salary: 3000,
-    equity: "0.13",
-    companyHandle: "c2"
-  });
-  await Job.create({
-    title: "j4",
-    salary: 4000,
-    equity: "0.0",
-    companyHandle: "c2"
-  });
+  // await Job.create({
+  //   title: "j1",
+  //   salary: 1000,
+  //   equity: "0.1",
+  //   companyHandle: "c1",
+  // });
+  // await Job.create({
+  //   title: "j2",
+  //   salary: 2000,
+  //   equity: "0.12",
+  //   companyHandle: "c1",
+  // });
+  // await Job.create({
+  //   title: "j3",
+  //   salary: 3000,
+  //   equity: "0.13",
+  //   companyHandle: "c2",
+  // });
+  // await Job.create({
+  //   title: "j4",
+  //   salary: 4000,
+  //   equity: "0.0",
+  //   companyHandle: "c2",
+  // });
+  // await User.applyToJob("u1", testJobIds[0]);
 }
 
 async function commonBeforeEach() {
@@ -134,11 +161,8 @@ async function commonAfterEach() {
 }
 
 async function commonAfterAll() {
-
   await db.end();
 }
-
-
 
 const u1Token = createToken({ username: "u1", isAdmin: false });
 const u2Token = createToken({ username: "u2", isAdmin: false });
@@ -149,7 +173,8 @@ module.exports = {
   commonBeforeEach,
   commonAfterEach,
   commonAfterAll,
+  testJobIds,
   u1Token,
   u2Token,
-  adminToken
+  adminToken,
 };

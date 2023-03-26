@@ -9,12 +9,11 @@ const { sqlForPartialUpdate } = require("../helpers/sql");
 class Company {
   /**
    *  Prevents sql injection by taking in key value pairs for datatoFilter
-   *  and provides inputs useable in a sql querry to sanitize the data.
+   *  and provides inputs useable in a sql query to sanitize the data.
    *
    *  Takes in dataToFilter:
    *    can include:
    *    {name: 'Jane', minEmployees: 100, maxEmployees: 500}
-   *
    *
    *  Returns an object with two keys:
    *    {whereStatement: "name ilike %$1% AND "num_employees > $2 AND num_employees < $3"
@@ -34,7 +33,6 @@ class Company {
 
     const whereStatements = keys.map((queryParams, idx) => {
       if (idx === 0) {
-        // added WHERE use is more flexible.
         return `WHERE ${statements[[queryParams]]}$${idx + 1}`;
       } else {
         return `${statements[[queryParams]]}$${idx + 1}`;
@@ -145,6 +143,16 @@ class Company {
     const company = companyRes.rows[0];
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
+
+    const jobsRes = await db.query(
+      `SELECT id, title, salary, equity
+         FROM jobs
+         WHERE company_handle = $1
+         ORDER BY id`,
+      [handle],
+    );
+
+    company.jobs = jobsRes.rows;
 
     return company;
   }

@@ -15,7 +15,6 @@ beforeEach(commonBeforeEach);
 afterEach(commonAfterEach);
 afterAll(commonAfterAll);
 
-//UPDATE: Moved here, changed name for better readability.
 /*************************************** SqlForFindAll */
 
 describe("use sql to query input parameters", function () {
