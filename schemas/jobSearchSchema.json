@@ -3,14 +3,14 @@
   "$id": "http://our.company.com/companyUpdate.schema.json",
   "type": "object",
   "properties": {
-    "titleLike": {
+    "title": {
       "type": "string"
     },
     "minSalary": {
       "type": "integer",
       "minimum": 0
     },
-    "equity": {
+    "hasEquity": {
       "type": "boolean"
     }
   },

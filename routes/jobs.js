@@ -53,7 +53,7 @@ router.get("/", async function (req, res, next) {
   let query = req.query;
   // need to convert salary to int, and equity to bool, arrive as type string
   if (query?.minSalary) query.minSalary = +query.minSalary;
-  if (query?.equity) query.equity === "true";
+  query.hasEquity = query.hasEquity === "true";
 
   const validator = jsonschema.validate(query, jobSearchSchema, {
     required: true,

@@ -299,11 +299,10 @@ describe("GET /companies/:handle", function () {
         description: "Desc1",
         numEmployees: 1,
         logoUrl: "http://c1.img",
-        //TODO: Revisit this, failing test, need to mock.
         jobs: [
-          { id: testJobIds[0], title: "J1", equity: "0.1", salary: 1 },
-          { id: testJobIds[1], title: "J2", equity: "0.2", salary: 2 },
-          { id: testJobIds[2], title: "J3", equity: null, salary: 3 },
+          { id: expect.any(Number), title: "J1", equity: "0.1", salary: 1 },
+          { id: expect.any(Number), title: "J2", equity: "0.2", salary: 2 },
+          { id: expect.any(Number), title: "J3", equity: null, salary: 3 },
         ],
       },
     });

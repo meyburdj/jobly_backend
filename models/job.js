@@ -33,6 +33,20 @@ class Job {
     return job;
   }
 
+  /** Create WHERE clause for filters, to be used by functions that query
+   * with filters.
+   *
+   * searchFilters (all optional):
+   * - minSalary
+   * - hasEquity
+   * - title (will find case-insensitive, partial matches)
+   *
+   * Returns {
+   *  where: "WHERE minSalary >= $1 AND title ILIKE $2",
+   *  vals: [10000, '%Engineer%']
+   * }
+   */
+
   static _filterWhereBuilder({ minSalary, hasEquity, title }) {
     let whereParts = [];
     let vals = [];
