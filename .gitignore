@@ -1,4 +1,11 @@
+# environment variables (optional)
 .env
-node_modules/
+
+# dependencies
+/node_modules
+
+# testing
+/coverage
+
+# logging of bugs for record and talking points
 buglog.md
-coverage
