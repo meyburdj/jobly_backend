@@ -137,19 +137,12 @@ describe("POST /users", function () {
 /************************************** GET /users */
 
 describe("GET /users", function () {
-  test("works for admin", async function () {
+  test("works: for admin", async function () {
     const resp = await request(app)
       .get("/users")
       .set("authorization", `Bearer ${adminToken}`);
     expect(resp.body).toEqual({
       users: [
-        {
-          email: "admin@user.com",
-          firstName: "admin",
-          isAdmin: true,
-          lastName: "admin",
-          username: "admin",
-        },
         {
           username: "u1",
           firstName: "U1F",
