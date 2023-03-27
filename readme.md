@@ -78,13 +78,13 @@ jest {name_of_file}.test.js (to run specific file)
 - Add company e-mail column, so users can send application
 - Add company login, so company can edit their job postings and view applicant details
 
-## Credits
+## 👉 Credits
 
 ---
 
 >Jobly was built while attending Rithm School as part of a 6 day sprint (3 days for front and backend each). The frontend was built with @yukdev and backend was built with @meyburdj. It was refactored after graduation, for efficiency and general code cleanup.
 
-## License
+## ⚖️ License
 
 ---
 
