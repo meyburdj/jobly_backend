@@ -53,6 +53,29 @@ describe("authenticate", function () {
   });
 });
 
+/*************************************** _createPassword */
+
+describe("createPassword", function () {
+  test("returns a random password of length 8", function () {
+    const password = User._createPassword();
+    expect(password.length).toEqual(8);
+  });
+
+  test("returns a random password of specified length", function () {
+    const password = User._createPassword(10);
+    expect(password.length).toEqual(10);
+  });
+
+  test("returns a string containing only characters from the charset", function () {
+    const password = User._createPassword();
+    const charset =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    for (let i = 0; i < password.length; i++) {
+      expect(charset).toContain(password[i]);
+    }
+  });
+});
+
 /************************************** register */
 
 describe("register", function () {
@@ -230,39 +253,38 @@ describe("remove", function () {
   });
 });
 
-  /************************************** applyToJob */
+/************************************** applyToJob */
 
-  describe("applyToJob", function () {
-    test("works", async function () {
-      await User.applyToJob("u1", testJobIds[1]);
+describe("applyToJob", function () {
+  test("works", async function () {
+    await User.applyToJob("u1", testJobIds[1]);
 
-      const res = await db.query("SELECT * FROM applications WHERE job_id=$1", [
-        testJobIds[1],
-      ]);
-      expect(res.rows).toEqual([
-        {
-          job_id: testJobIds[1],
-          username: "u1",
-        },
-      ]);
-    });
-
-    test("not found if no such job", async function () {
-      try {
-        await User.applyToJob("u1", 0, "applied");
-        throw new Error("fail test, you shouldn't get here");
-      } catch (err) {
-        expect(err instanceof NotFoundError).toBeTruthy();
-      }
-    });
-
-    test("not found if no such user", async function () {
-      try {
-        await User.applyToJob("nope", testJobIds[0], "applied");
-        throw new Error("fail test, you shouldn't get here");
-      } catch (err) {
-        expect(err instanceof NotFoundError).toBeTruthy();
-      }
-    });
+    const res = await db.query("SELECT * FROM applications WHERE job_id=$1", [
+      testJobIds[1],
+    ]);
+    expect(res.rows).toEqual([
+      {
+        job_id: testJobIds[1],
+        username: "u1",
+      },
+    ]);
   });
 
+  test("not found if no such job", async function () {
+    try {
+      await User.applyToJob("u1", 0, "applied");
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+
+  test("not found if no such user", async function () {
+    try {
+      await User.applyToJob("nope", testJobIds[0], "applied");
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+});

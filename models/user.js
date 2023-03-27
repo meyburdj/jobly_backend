@@ -2,6 +2,7 @@
 
 const db = require("../db");
 const bcrypt = require("bcrypt");
+const _ = require("lodash");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 const {
   NotFoundError,
@@ -14,7 +15,7 @@ const { BCRYPT_WORK_FACTOR } = require("../config.js");
 /** Related functions for users. */
 
 class User {
-  /** authenticate user with username, password.
+  /** Authenticate user with username, password.
    *
    * Returns { username, first_name, last_name, email, is_admin }
    *
@@ -47,6 +48,18 @@ class User {
     }
 
     throw new UnauthorizedError("Invalid username/password");
+  }
+
+
+  /** Creates a random password.
+   *
+   * Returns randomized string
+   */
+  static _createPassword(length = 8) {
+    const charset =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    const charArray = charset.split("");
+    return _.sampleSize(charArray, length).join("");
   }
 
   /** Register user with data.
