@@ -8,51 +8,6 @@ const { sqlForPartialUpdate } = require("../helpers/sql");
 
 class Company {
   /**
-   *  Prevents sql injection by taking in key value pairs for datatoFilter
-   *  and provides inputs useable in a sql query to sanitize the data.
-   *
-   *  Takes in dataToFilter:
-   *    can include:
-   *    {name: 'Jane', minEmployees: 100, maxEmployees: 500}
-   *
-   *  Returns an object with two keys:
-   *    {whereStatement: "name ilike %$1% AND "num_employees > $2 AND num_employees < $3"
-   *    Values: [%jane%, 100, 500] }
-   */
-  static sqlForFindAll(dataToFilter) {
-    const keys = Object.keys(dataToFilter);
-
-    const statements = {
-      nameLike: "name ILIKE ",
-      minEmployees: "num_employees >= ",
-      maxEmployees: "num_employees <= ",
-    };
-
-    // {name: 'Jane', minEmployees: 100, maxEmployees: 500} returns:
-    //  ["WHERE name ilike %$1%", "num_employees > $2", num_employees < $3]
-
-    const whereStatements = keys.map((queryParams, idx) => {
-      if (idx === 0) {
-        return `WHERE ${statements[[queryParams]]}$${idx + 1}`;
-      } else {
-        return `${statements[[queryParams]]}$${idx + 1}`;
-      }
-    });
-
-    const values = Object.keys(dataToFilter).map((key) => {
-      if (key === "nameLike") {
-        dataToFilter[key] = `%${dataToFilter[key]}%`;
-      }
-      return dataToFilter[key];
-    });
-
-    return {
-      whereStatement: whereStatements.join(" AND "),
-      values,
-    };
-  }
-
-  /**
    * Create a company (from data), update db, return new company data.
    *
    * data should be { handle, name, description, numEmployees, logoUrl }
@@ -90,33 +45,79 @@ class Company {
     return company;
   }
 
-  /**
-   * Filter for companies by search terms.
+  /** Create WHERE clause for filters, to be used by functions that query
+   * with filters.
    *
-   *  Search terms are optional.
+   * searchFilters (all optional):
+   * - minEmployees
+   * - maxEmployees
+   * - nameLike (will find case-insensitive, partial matches)
    *
-   *  {nameLike, minEmployees, maxEmployees}
+   * Returns {
+   *  where: "WHERE num_employees >= $1 AND name ILIKE $2",
+   *  vals: [100, '%Apple%']
+   * }
+   */
+
+  static _filterWhereBuilder({ minEmployees, maxEmployees, nameLike }) {
+    let whereParts = [];
+    let vals = [];
+
+    if (minEmployees !== undefined) {
+      vals.push(minEmployees);
+      whereParts.push(`num_employees >= $${vals.length}`);
+    }
+
+    if (maxEmployees !== undefined) {
+      vals.push(maxEmployees);
+      whereParts.push(`num_employees <= $${vals.length}`);
+    }
+
+    if (nameLike) {
+      vals.push(`%${nameLike}%`);
+      whereParts.push(`name ILIKE $${vals.length}`);
+    }
+
+    const where =
+      whereParts.length > 0 ? "WHERE " + whereParts.join(" AND ") : "";
+
+    return { where, vals };
+  }
+
+  /** Find all companies (optional filter on searchFilters).
+   *
+   * searchFilters (all optional):
+   * - minEmployees
+   * - maxEmployees
+   * - nameLike (will find case-insensitive, partial matches)
    *
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
-   *
-   * If no results are found, then return the empty array.
-   *
-   * If no search terms are given, then return all companies.
    * */
-  static async findAll(searchTerms = {}) {
 
-    const { whereStatement, values } = Company.sqlForFindAll(searchTerms);
+  static async findAll(searchFilters = {}) {
+    const { minEmployees, maxEmployees, nameLike } = searchFilters;
+
+    if (minEmployees > maxEmployees) {
+      throw new BadRequestError("Min employees cannot be greater than max");
+    }
+
+    const { where, vals } = this._filterWhereBuilder({
+      minEmployees,
+      maxEmployees,
+      nameLike,
+    });
 
     const companiesRes = await db.query(
-      `SELECT handle,
-              name,
-              description,
-              num_employees AS "numEmployees",
-              logo_url AS "logoUrl"
-        FROM companies
-        ${whereStatement}
-        ORDER BY name`,
-      [...values]
+      `
+    SELECT handle,
+           name,
+           description,
+           num_employees AS "numEmployees",
+           logo_url AS "logoUrl"
+      FROM companies ${where}
+      ORDER BY name
+  `,
+      vals
     );
     return companiesRes.rows;
   }
@@ -149,7 +150,7 @@ class Company {
          FROM jobs
          WHERE company_handle = $1
          ORDER BY id`,
-      [handle],
+      [handle]
     );
 
     company.jobs = jobsRes.rows;

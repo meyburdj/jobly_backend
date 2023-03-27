@@ -15,25 +15,6 @@ beforeEach(commonBeforeEach);
 afterEach(commonAfterEach);
 afterAll(commonAfterAll);
 
-/*************************************** SqlForFindAll */
-
-describe("use sql to query input parameters", function () {
-  test("gives correct query", function () {
-    const dataToFilter = {
-      nameLike: "bak",
-      minEmployees: 10,
-      maxEmployees: 500,
-    };
-
-    const output = Company.sqlForFindAll(dataToFilter);
-    expect(output).toEqual({
-      values: ["%bak%", 10, 500],
-      whereStatement:
-        "WHERE name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3",
-    });
-  });
-});
-
 /************************************** create */
 
 describe("create", function () {
@@ -76,6 +57,55 @@ describe("create", function () {
   });
 });
 
+/************************************** _filterWhereBuilder */
+
+describe("_filterWhereBuilder", function () {
+  test("works with no filter criteria", function () {
+    const criteria = {};
+
+    expect(Company._filterWhereBuilder(criteria)).toEqual({
+      where: "",
+      vals: [],
+    });
+  });
+
+  test("works with min and not max", function () {
+    const criteria = {
+      minEmployees: 10,
+    };
+
+    expect(Company._filterWhereBuilder(criteria)).toEqual({
+      where: "WHERE num_employees >= $1",
+      vals: [10],
+    });
+  });
+
+  test("works with max and not min", function () {
+    const criteria = {
+      maxEmployees: 10,
+    };
+
+    expect(Company._filterWhereBuilder(criteria)).toEqual({
+      where: "WHERE num_employees <= $1",
+      vals: [10],
+    });
+  });
+
+  test("works when all criteria options supplied", function () {
+    const criteria = {
+      minEmployees: 1,
+      maxEmployees: 10,
+      nameLike: "Apple",
+    };
+
+    expect(Company._filterWhereBuilder(criteria)).toEqual({
+      where:
+        "WHERE num_employees >= $1 AND num_employees <= $2 AND name ILIKE $3",
+      vals: [1, 10, "%Apple%"],
+    });
+  });
+});
+
 /************************************** findAll */
 
 describe("findAll", function () {
@@ -105,42 +135,50 @@ describe("findAll", function () {
       },
     ]);
   });
-});
 
-/************************************** get */
-
-describe("get", function () {
-  test("works", async function () {
-    let company = await Company.get("c1");
-    expect(company).toEqual({
-      handle: "c1",
-      name: "C1",
-      description: "Desc1",
-      numEmployees: 1,
-      logoUrl: "http://c1.img",
-    });
+  test("works: filter min employees", async function () {
+    let companies = await Company.findAll({ minEmployees: 2 });
+    expect(companies).toEqual([
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
   });
 
-  test("not found if no such company", async function () {
-    try {
-      await Company.get("nope");
-      throw new Error("fail test, you shouldn't get here");
-    } catch (err) {
-      expect(err instanceof NotFoundError).toBeTruthy();
-    }
+  test("works: filter by max employees", async function () {
+    let companies = await Company.findAll({ maxEmployees: 2 });
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+    ]);
   });
-});
 
-/************************************** findAll */
-
-describe("findAll", function () {
-  test("works", async function () {
-    let company = await Company.findAll({
-      nameLike: "c1",
-      minEmployees: "1",
-      maxEmployees: "2",
-    });
-    expect(company).toEqual([
+  test("works: filter by min & max employees", async function () {
+    let companies = await Company.findAll({ minEmployees: 1, maxEmployees: 1 });
+    expect(companies).toEqual([
       {
         handle: "c1",
         name: "C1",
@@ -151,10 +189,10 @@ describe("findAll", function () {
     ]);
   });
 
-  test("Invalid Number Input", async function () {
+
+  test("fails: filter by invalid input", async function () {
     try {
       await Company.get({
-        nameLike: "c",
         minEmployees: "a",
         maxEmployees: "c",
       });
@@ -164,7 +202,24 @@ describe("findAll", function () {
     }
   });
 
-  // UPDATE: Added min > max.
+  test("works: filter by name", async function () {
+    let companies = await Company.findAll({ nameLike: "1" });
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+    ]);
+  });
+
+  test("works: return empty list on no result", async function () {
+    let companies = await Company.findAll({ nameLike: "nope" });
+    expect(companies).toEqual([]);
+  });
+
   test("Min > Max failure", async function () {
     try {
       await Company.get({
@@ -178,6 +233,37 @@ describe("findAll", function () {
     }
   });
 });
+
+/************************************** get */
+
+describe("get", function () {
+  test("works", async function () {
+    let company = await Company.get("c1");
+    expect(company).toEqual({
+      handle: "c1",
+      name: "C1",
+      description: "Desc1",
+      numEmployees: 1,
+      logoUrl: "http://c1.img",
+      jobs: [
+        { id: expect.any(Number), title: "Job1", salary: 100, equity: "0.1" },
+        { id: expect.any(Number), title: "Job2", salary: 200, equity: "0.2" },
+        { id: expect.any(Number), title: "Job3", salary: 300, equity: "0" },
+        { id: expect.any(Number), title: "Job4", salary: null, equity: null },
+      ],
+    });
+  });
+
+  test("not found: no such company", async function () {
+    try {
+      await Company.get("non-company");
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+});
+
 
 /************************************** update */
 
@@ -242,7 +328,7 @@ describe("update", function () {
     ]);
   });
 
-  test("fails: not found if no such company", async function () {
+  test("not found if no such company", async function () {
     try {
       await Company.update("nope", updateData);
       throw new Error("fail test, you shouldn't get here");
