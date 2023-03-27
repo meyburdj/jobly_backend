@@ -4,7 +4,8 @@
 
 Jobly is a job-search application that allows users to signup, login, search, and apply to jobs.
 
- [Demo Here]([https://jobly-cl.netlify.app/](https://jobly-cl.netlify.app/)), deployed with with Netlify & Railway
+ Demo [here](https://jobly-cl.netlify.app/), deployed with with Netlify & Railway
+
  **Login**: *guest* | **Password**: *password*
 
 ##  🧐  Motivation & Challenges
@@ -15,7 +16,7 @@ Jobly is a job-search application that allows users to signup, login, search, an
 >
 > I also found raw SQL queries to be quite challenging at first, but slowly adapted, and learned to like the control given when you do not use an ORM.
 
-##  💻  Tech  Stack & Packages
+##  💻  **Tech Stack** & *Packages*
 
   **Node.js | Express | SQL | Postgres | Jest**
 
@@ -25,7 +26,7 @@ Jobly is a job-search application that allows users to signup, login, search, an
 
 ---
 
-Here is a high level overview a few of the features I am proud of:
+Here is a high level overview of a few of the features:
 - RESTful API built with Node.js and Express
 - 95% test coverage for backend data using Jest
 - No ORM, raw SQL queries
@@ -58,7 +59,7 @@ Will be running on localhost 3001.
 ---
 
 ```shell
-$ npm i --global jest (this is a global install, ignore if you have)
+$ npm i --global jest (this is a global install, ignore if you already have)
 
 --- JEST COMMANDS ---
 jest -i (runs all tests)
@@ -66,11 +67,6 @@ jest --coverage (shows coverage of app)
 jest {name_of_file}.test.js (to run specific file)
 
 ```
-
-
-%%##  ✏️  Models & Diagrams%%
-
-
 
 ###  ☑️ To-Do's
 
@@ -86,7 +82,7 @@ jest {name_of_file}.test.js (to run specific file)
 
 ---
 
->Jobly was built while attending Rithm School as part of a 6 day sprint (3 days for front and backend each). The frontend was built with @yukdev and backend was built with @meyerj. It was refactored after graduation, for efficiency and general code cleanup.
+>Jobly was built while attending Rithm School as part of a 6 day sprint (3 days for front and backend each). The frontend was built with @yukdev and backend was built with @meyburdj. It was refactored after graduation, for efficiency and general code cleanup.
 
 ## License
 
