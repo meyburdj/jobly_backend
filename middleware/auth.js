@@ -17,9 +17,8 @@ const { UnauthorizedError } = require("../expressError");
 function authenticateJWT(req, res, next) {
   try {
     const authHeader = req.headers && req.headers.authorization;
-    console.log("authHeader", authHeader);
     if (authHeader) {
-      // remove "[Bb]earer" from header"
+      // remove "[Bb]earer" from header" and trim whitespace
       const token = authHeader.replace(/^[Bb]earer /, "").trim();
       res.locals.user = jwt.verify(token, SECRET_KEY);
     }
@@ -50,6 +49,11 @@ function ensureAdmin(req, res, next) {
   }
   return next();
 }
+
+/** Middleware to use when user must be logged in as an admin or self.
+ *
+ *  If not, raises Unauthorized.
+ */
 
 function ensureSelfOrAdmin(req, res, next) {
   const user = res.locals.user;

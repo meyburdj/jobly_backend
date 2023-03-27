@@ -25,7 +25,6 @@ const router = new express.Router({ mergeParams: true });
  */
 
 router.post("/", ensureAdmin, async function (req, res, next) {
-  console.log("I've hit the post route");
   const validator = jsonschema.validate(req.body, jobNewSchema, {
     required: true,
   });
