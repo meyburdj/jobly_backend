@@ -12,9 +12,9 @@ Jobly is a job-search application that allows users to signup, login, search, an
 
 ---
 
-> My major motivation with the backend was to learn about test-driven development, coverage, and error handling. TTD was extremely tedious to start, but I grew appreciate how it forces the developer write thoughtful code based on initial design. I'd imagine it would become smoother of a process as experience grows.
+> My major motivation with the backend was to learn about test-driven development, coverage, and error handling within a Node environment. TTD was a departure from past projects, but I grew appreciate how it forces the developer write thoughtful code based on initial design. 
 >
-> I also found raw SQL queries to be quite challenging at first, but slowly adapted, and learned to like the control given when you do not use an ORM.
+> This was my first backend project without any ORM. Raw SQL queries were a difficult change and introduced new syntactical bugs, but in the end the control over the raw queries had it's own benifits. 
 
 ##  💻  **Tech Stack** & *Packages*
 
@@ -73,8 +73,6 @@ jest {name_of_file}.test.js (to run specific file)
 ---
 
 - Convert to TypeScript
-- Add Sequelize as ORM (for practice)
-- Add additional tests to reach 100%
 - Add company e-mail column, so users can send application
 - Add company login, so company can edit their job postings and view applicant details
 
@@ -82,14 +80,14 @@ jest {name_of_file}.test.js (to run specific file)
 
 ---
 
->Jobly was built while attending Rithm School as part of a 6 day sprint (3 days for front and backend each). The frontend was built with @yukdev and backend was built with @meyburdj. It was refactored after graduation, for efficiency and general code cleanup.
+>Jobly was built while attending Rithm School as part of a 6 day sprint (3 days for front and backend each). The frontend was built with @nico-martinucci and backend was built with @chalonlubin. It was refactored after graduation, for efficiency and general code cleanup.
 
 ## ⚖️ License
 
 ---
 
 ```
-Copyright [2023] [Chalon Lubin]
+Copyright [2023] [Jesse Gelburd-Meyers]
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
