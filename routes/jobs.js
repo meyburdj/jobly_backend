@@ -49,6 +49,7 @@ router.post("/", ensureAdmin, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
+  console.log("im in jobs");
   let query = req.query;
   // need to convert salary to int, and equity to bool, arrive as type string
   if (query?.minSalary) query.minSalary = +query.minSalary;
