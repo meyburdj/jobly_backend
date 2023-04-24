@@ -20,10 +20,11 @@ const { BadRequestError } = require("../expressError");
  */
 
 router.post("/token", async function (req, res, next) {
+  console.log("I am generating a token post");
   const validator = jsonschema.validate(
     req.body,
     userAuthSchema,
-    {required: true}
+    { required: true }
   );
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);
@@ -47,10 +48,11 @@ router.post("/token", async function (req, res, next) {
  */
 
 router.post("/register", async function (req, res, next) {
+  console.log("I am doing a register post");
   const validator = jsonschema.validate(
     req.body,
     userRegisterSchema,
-    {required: true}
+    { required: true }
   );
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);
