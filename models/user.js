@@ -260,6 +260,25 @@ class User {
       [jobId, username]
     );
   }
+
+  static async getAppliedJobs(username) {
+    const jobsRes = await db.query(
+      `SELECT j.id,
+              j.title,
+              j.salary,
+              j.equity,
+              j.company_handle AS "companyHandle",
+              c.name AS "companyName"
+       FROM jobs j
+       JOIN applications a ON j.id = a.job_id
+       JOIN companies c ON c.handle = j.company_handle
+       WHERE a.username = $1`,
+      [username]
+    );
+
+    return jobsRes.rows;
+  }
+
 }
 
 module.exports = User;

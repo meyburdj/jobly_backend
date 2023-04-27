@@ -170,8 +170,8 @@ describe("GET /users", function () {
 
   test("unauth for non-admin users", async function () {
     const resp = await request(app)
-        .get("/users")
-        .set("authorization", `Bearer ${u1Token}`);
+      .get("/users")
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
   });
 
@@ -415,3 +415,102 @@ describe("DELETE /users/:username", function () {
     expect(resp.statusCode).toEqual(404);
   });
 });
+
+/************************************** POST /users/:username/jobs/:id */
+
+describe("POST /users/:username/jobs/:id", function () {
+  test("works for admin", async function () {
+    const resp = await request(app)
+      .post(`/users/u2/jobs/${testJobIds[1]}`)
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.body).toEqual({ applied: testJobIds[1] });
+  });
+
+  test("works for that user", async function () {
+    const resp = await request(app)
+      .post(`/users/u2/jobs/${testJobIds[1]}`)
+      .set("authorization", `Bearer ${u2Token}`);
+    expect(resp.body).toEqual({ applied: testJobIds[1] });
+  });
+
+  test("unauth for wrong user", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${testJobIds[1]}`)
+      .set("authorization", `Bearer ${u2Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("unauth for anon", async function () {
+    const resp = await request(app).post(`/users/u1/jobs/${testJobIds[1]}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("not found if user missing", async function () {
+    const resp = await request(app)
+      .post(`/users/nope/jobs/${testJobIds[1]}`)
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+
+  test("not found if job missing", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/0`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+});
+
+/************************************** GET /users/:username/jobs */
+
+describe("GET /users/:username/jobs", function () {
+  test("works for admin", async function () {
+    const resp = await request(app)
+      .get(`/users/u1/jobs`)
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.body).toEqual({
+      jobs: [
+        {
+          id: testJobIds[0],
+          title: "J1",
+          salary: 1,
+          equity: "0.1",
+          companyHandle: "c1",
+          companyName: "C1",
+        },
+      ],
+    });
+  });
+
+  test("works for that user", async function () {
+    const resp = await request(app)
+      .get(`/users/u1/jobs`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({
+      jobs: [
+        {
+          id: testJobIds[0],
+          title: "J1",
+          salary: 1,
+          equity: "0.1",
+          companyHandle: "c1",
+          companyName: "C1",
+        },
+      ],
+    });
+  });
+
+  test("unauth for wrong user", async function () {
+    const resp = await request(app)
+      .get(`/users/u1/jobs`)
+      .set("authorization", `Bearer ${u2Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("unauth for anon", async function () {
+    const resp = await request(app).get(`/users/u1/jobs`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+
+});
+

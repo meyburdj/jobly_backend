@@ -288,3 +288,28 @@ describe("applyToJob", function () {
     }
   });
 });
+
+/************************************** getAppliedJobs */
+
+describe("getAppliedJobs", function () {
+  test("works", async function () {
+    const jobs = await User.getAppliedJobs("u1");
+    expect(jobs).toEqual([
+      {
+        id: testJobIds[0],
+        title: "Job1",
+        salary: 100,
+        equity: "0.1",
+        companyHandle: "c1",
+        companyName: "C1",
+      },
+    ]);
+  });
+
+  test("works: no applications", async function () {
+    const jobs = await User.getAppliedJobs("u2");
+    expect(jobs).toEqual([]);
+  });
+
+});
+
