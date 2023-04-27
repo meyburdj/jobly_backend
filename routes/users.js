@@ -143,4 +143,16 @@ router.post(
   }
 );
 
+router.get("/:username/jobs",
+  ensureSelfOrAdmin,
+  async function (req, res, next) {
+    try {
+      const username = req.params.username;
+      const jobs = await User.getAppliedJobs(username);
+      return res.json({ jobs });
+    } catch (err) {
+      return next(err);
+    }
+  });
+
 module.exports = router;
